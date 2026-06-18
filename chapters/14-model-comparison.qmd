@@ -1,0 +1,32 @@
+# Model Comparison and Selection
+
+```{r}
+#| label: setup-14-model-comparison
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+LOO-CV with the loo package, WAIC, and when not to compare models.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Content
+
+*Content to be written.*
+
+## Exercises
+
+1. Exercise 1
+2. Exercise 2
+
+## Summary
+
+*Summary to be written.*

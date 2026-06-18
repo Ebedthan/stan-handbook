@@ -1,0 +1,32 @@
+# Two-Way ANOVA and Interactions
+
+```{r}
+#| label: setup-07-two-way-anova
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+Additive vs interaction models, identifiability, and visualising interaction posteriors.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Content
+
+*Content to be written.*
+
+## Exercises
+
+1. Exercise 1
+2. Exercise 2
+
+## Summary
+
+*Summary to be written.*

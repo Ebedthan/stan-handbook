@@ -1,0 +1,15 @@
+{
+  "hash": "f1eecf56e29d051ded0fe73a72d1b2eb",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Two-Way ANOVA and Interactions\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Overview\n\nAdditive vs interaction models, identifiability, and visualising interaction posteriors.\n\n## Learning objectives\n\nBy the end of this chapter you will be able to:\n\n- [ ] Objective 1\n- [ ] Objective 2\n- [ ] Objective 3\n\n## Content\n\n*Content to be written.*\n\n## Exercises\n\n1. Exercise 1\n2. Exercise 2\n\n## Summary\n\n*Summary to be written.*\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

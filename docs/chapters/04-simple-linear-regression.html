@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.56">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>4&nbsp; Simple Linear Regression in Stan – Writing Statistical Models in Stan</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/05-multiple-regression.html" rel="next">
+<link href="../chapters/03-bayesian-thinking.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script><script src="../site_libs/quarto-diagram/mermaid.min.js"></script><script src="../site_libs/quarto-diagram/mermaid-init.js"></script><link href="../site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+</head>
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top"><nav class="quarto-secondary-nav"><div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Simple Linear Regression in Stan</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav></header><!-- content --><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Writing Statistical Models in Stan</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/Ebedthan/stan-handbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+  <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Getting Started</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-why-stan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Why Stan?</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Setting Up Your Environment</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-bayesian-thinking.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Thinking Like a Bayesian</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">The Linear World</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-simple-linear-regression.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Simple Linear Regression in Stan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-multiple-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-one-way-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-two-way-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Two-Way ANOVA and Interactions</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Hierarchical Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/08-intro-hierarchical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Introduction to Hierarchical Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/09-random-slopes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Random Slopes and Varying Effects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/10-non-centred.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Non-Centred Parameterisation</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Beyond the Normal</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/11-glm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Generalised Linear Models in Stan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/12-ordinal-categorical.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Ordinal and Categorical Outcomes</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Good Practice and Going Further</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/13-prior-predictive.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Prior Predictive Checks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/14-model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model Comparison and Selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/15-debugging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Debugging Stan Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/16-publication.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">From Stan to Publication</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/A-stan-reference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Stan Language Quick Reference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/B-prior-gallery.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Prior Distribution Gallery</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/C-mcmc-diagnostics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Glossary of MCMC Diagnostics</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendices/D-further-reading.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Further Reading and Resources</span></span></a>
+  </div>
+</li>
+      </ul>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">
+<li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+      </ul>
+</li>
+    </ul>
+</div>
+</nav><div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active"><h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+<li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">4.1</span> Overview</a></li>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">4.2</span> Learning objectives</a></li>
+  <li><a href="#the-model" id="toc-the-model" class="nav-link" data-scroll-target="#the-model"><span class="header-section-number">4.3</span> The model</a></li>
+  <li><a href="#a-running-example-litter-decomposition" id="toc-a-running-example-litter-decomposition" class="nav-link" data-scroll-target="#a-running-example-litter-decomposition"><span class="header-section-number">4.4</span> A running example: litter decomposition</a></li>
+  <li>
+<a href="#sec-stan-file" id="toc-sec-stan-file" class="nav-link" data-scroll-target="#sec-stan-file"><span class="header-section-number">4.5</span> The Stan file</a>
+  <ul class="collapse">
+<li><a href="#anatomy-of-this-program" id="toc-anatomy-of-this-program" class="nav-link" data-scroll-target="#anatomy-of-this-program"><span class="header-section-number">4.5.1</span> Anatomy of this program</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#compiling-and-sampling" id="toc-compiling-and-sampling" class="nav-link" data-scroll-target="#compiling-and-sampling"><span class="header-section-number">4.6</span> Compiling and sampling</a>
+  <ul class="collapse">
+<li><a href="#step-1-compile" id="toc-step-1-compile" class="nav-link" data-scroll-target="#step-1-compile"><span class="header-section-number">4.6.1</span> Step 1: compile</a></li>
+  <li><a href="#step-2-prepare-the-data-list" id="toc-step-2-prepare-the-data-list" class="nav-link" data-scroll-target="#step-2-prepare-the-data-list"><span class="header-section-number">4.6.2</span> Step 2: prepare the data list</a></li>
+  <li><a href="#step-3-sample" id="toc-step-3-sample" class="nav-link" data-scroll-target="#step-3-sample"><span class="header-section-number">4.6.3</span> Step 3: sample</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-convergence" id="toc-sec-convergence" class="nav-link" data-scroll-target="#sec-convergence"><span class="header-section-number">4.7</span> Convergence diagnostics</a>
+  <ul class="collapse">
+<li><a href="#the-summary-table" id="toc-the-summary-table" class="nav-link" data-scroll-target="#the-summary-table"><span class="header-section-number">4.7.1</span> The summary table</a></li>
+  <li><a href="#trace-plots" id="toc-trace-plots" class="nav-link" data-scroll-target="#trace-plots"><span class="header-section-number">4.7.2</span> Trace plots</a></li>
+  <li><a href="#posterior-pair-plot" id="toc-posterior-pair-plot" class="nav-link" data-scroll-target="#posterior-pair-plot"><span class="header-section-number">4.7.3</span> Posterior pair plot</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-interpret" id="toc-sec-interpret" class="nav-link" data-scroll-target="#sec-interpret"><span class="header-section-number">4.8</span> Interpreting the posterior</a>
+  <ul class="collapse">
+<li><a href="#marginal-posteriors" id="toc-marginal-posteriors" class="nav-link" data-scroll-target="#marginal-posteriors"><span class="header-section-number">4.8.1</span> Marginal posteriors</a></li>
+  <li><a href="#posterior-for-the-slope" id="toc-posterior-for-the-slope" class="nav-link" data-scroll-target="#posterior-for-the-slope"><span class="header-section-number">4.8.2</span> Posterior for the slope</a></li>
+  <li><a href="#the-regression-line-and-its-uncertainty" id="toc-the-regression-line-and-its-uncertainty" class="nav-link" data-scroll-target="#the-regression-line-and-its-uncertainty"><span class="header-section-number">4.8.3</span> The regression line and its uncertainty</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-ppc" id="toc-sec-ppc" class="nav-link" data-scroll-target="#sec-ppc"><span class="header-section-number">4.9</span> Posterior predictive check</a></li>
+  <li><a href="#comparison-with-lm" id="toc-comparison-with-lm" class="nav-link" data-scroll-target="#comparison-with-lm"><span class="header-section-number">4.10</span> Comparison with <code>lm()</code></a></li>
+  <li><a href="#sec-workflow" id="toc-sec-workflow" class="nav-link" data-scroll-target="#sec-workflow"><span class="header-section-number">4.11</span> The complete workflow at a glance</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">4.12</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">4.13</span> Exercises</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">4.14</span> Further reading</a></li>
+  </ul><div class="toc-actions"><ul><li><a href="https://github.com/Ebedthan/stan-handbook/edit/main/chapters/04-simple-linear-regression.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Ebedthan/stan-handbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Simple Linear Regression in Stan</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title">
+<span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Simple Linear Regression in Stan</span>
+</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header><section id="overview" class="level2" data-number="4.1"><h2 data-number="4.1" class="anchored" data-anchor-id="overview">
+<span class="header-section-number">4.1</span> Overview</h2>
+<p>This is the chapter where Stan modelling starts in earnest. We take the model you have known since your first statistics course, <span class="math inline">\(y_i = \alpha + \beta x_i + \varepsilon_i\)</span>, and write it completely from scratch in Stan. Along the way you will meet the full chapter workflow that all subsequent model chapters follow: simulate data, write the Stan file, compile, sample, check convergence, run posterior predictive checks, and compare with the classical equivalent.</p>
+<p>Everything in this chapter is a template. When you write a Poisson model in Chapter 11 or a hierarchical model in Chapter 8, you will be extending exactly this structure.</p>
+</section><section id="learning-objectives" class="level2" data-number="4.2"><h2 data-number="4.2" class="anchored" data-anchor-id="learning-objectives">
+<span class="header-section-number">4.2</span> Learning objectives</h2>
+<p>By the end of this chapter you will be able to:</p>
+<ul>
+<li>Write a complete Stan program for simple linear regression, including priors, likelihood, and a <code>generated quantities</code> block.</li>
+<li>Compile and sample from the model using <code>cmdstanr</code>, pass data as a named R list, and extract posterior draws with <code>posterior</code>.</li>
+<li>Assess convergence using <span class="math inline">\(\hat{R}\)</span>, bulk and tail ESS, and trace plots.</li>
+<li>Perform a posterior predictive check and interpret the result.</li>
+<li>Compare Stan posterior summaries with <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> output and explain any differences.</li>
+</ul>
+<hr></section><section id="the-model" class="level2" data-number="4.3"><h2 data-number="4.3" class="anchored" data-anchor-id="the-model">
+<span class="header-section-number">4.3</span> The model</h2>
+<p>Simple linear regression assumes that the outcome <span class="math inline">\(y_i\)</span> is a linear function of a single predictor <span class="math inline">\(x_i\)</span>, plus Gaussian noise:</p>
+<p><span class="math display">\[
+y_i = \alpha + \beta\, x_i + \varepsilon_i,
+\qquad \varepsilon_i \sim \text{Normal}(0, \sigma)
+\]</span></p>
+<p>Equivalently, written as a probability model:</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}(\alpha + \beta\, x_i,\; \sigma)
+\]</span></p>
+<p>There are three parameters to estimate:</p>
+<div id="tbl-params" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-params-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.1: Parameters of simple linear regression.
+</figcaption><div aria-describedby="tbl-params-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead><tr class="header">
+<th>Parameter</th>
+<th>Meaning</th>
+<th>Constraint</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>Intercept: expected <span class="math inline">\(y\)</span> when <span class="math inline">\(x = 0\)</span>
+</td>
+<td>none</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\beta\)</span></td>
+<td>Slope: change in expected <span class="math inline">\(y\)</span> per unit increase in <span class="math inline">\(x\)</span>
+</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>Residual SD: unexplained variation</td>
+<td><span class="math inline">\(&gt; 0\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<hr></section><section id="a-running-example-litter-decomposition" class="level2" data-number="4.4"><h2 data-number="4.4" class="anchored" data-anchor-id="a-running-example-litter-decomposition">
+<span class="header-section-number">4.4</span> A running example: litter decomposition</h2>
+<p>Litter decomposition is a key process in forest ecosystem nutrient cycling. We will model the relationship between <strong>mean annual temperature</strong> (°C, centred) and <strong>decomposition rate</strong> <span class="math inline">\(k\)</span> (yr⁻¹, log-transformed) across plots in a West African forest-savanna mosaic.</p>
+<p>We simulate data that are realistic for this system, but in your own work you would replace <code>simulate_data()</code> below with a call to read your own dataset.</p>
+<div class="cell">
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># True parameter values (we will try to recover these)</span></span>
+<span><span class="va">true_alpha</span> <span class="op">&lt;-</span> <span class="fl">1.20</span>    <span class="co"># log(k) at mean temperature</span></span>
+<span><span class="va">true_beta</span>  <span class="op">&lt;-</span> <span class="fl">0.08</span>    <span class="co"># increase in log(k) per 1°C above mean</span></span>
+<span><span class="va">true_sigma</span> <span class="op">&lt;-</span> <span class="fl">0.25</span>    <span class="co"># residual SD</span></span>
+<span></span>
+<span><span class="va">N</span>  <span class="op">&lt;-</span> <span class="fl">45</span>              <span class="co"># number of plots</span></span>
+<span></span>
+<span><span class="co"># Predictor: temperature anomaly (°C) relative to site mean</span></span>
+<span><span class="va">x</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span>, mean <span class="op">=</span> <span class="fl">0</span>, sd <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Outcome: log decomposition rate</span></span>
+<span><span class="va">y</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span>, mean <span class="op">=</span> <span class="va">true_alpha</span> <span class="op">+</span> <span class="va">true_beta</span> <span class="op">*</span> <span class="va">x</span>, sd <span class="op">=</span> <span class="va">true_sigma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Collect into a data frame for plotting</span></span>
+<span><span class="va">decomp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">decomp</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.75</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_abline</span><span class="op">(</span></span>
+<span>    intercept <span class="op">=</span> <span class="va">true_alpha</span>, slope <span class="op">=</span> <span class="va">true_beta</span>,</span>
+<span>    linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"grey40"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Temperature anomaly (°C, centred)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">log</span><span class="op">~</span><span class="va">decomposition</span><span class="op">~</span><span class="va">rate</span><span class="op">~</span><span class="op">(</span><span class="va">yr</span><span class="op">^</span><span class="op">{</span><span class="op">-</span><span class="fl">1</span><span class="op">}</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Litter decomposition across forest-savanna plots"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="04-simple-linear-regression_files/figure-html/simulate-data-1.png" class="img-fluid figure-img" style="width:95.0%"></p>
+<figcaption>Simulated litter decomposition data. Mean annual temperature (centred, °C) predicts log decomposition rate. The dashed line is the true data-generating relationship; points scatter around it with σ = 0.25.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Why centre the predictor?</strong><br>
+Centring <span class="math inline">\(x\)</span> so that its mean is zero gives <span class="math inline">\(\alpha\)</span> a meaningful interpretation: the expected outcome at the <em>average</em> temperature, not at <span class="math inline">\(x = 0\)</span> which may be far outside the data range. Centring also reduces posterior correlation between <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>, which improves sampler efficiency. We will always centre (and usually scale) predictors throughout this handbook.</p>
+</div>
+</div>
+</div>
+<hr></section><section id="sec-stan-file" class="level2" data-number="4.5"><h2 data-number="4.5" class="anchored" data-anchor-id="sec-stan-file">
+<span class="header-section-number">4.5</span> The Stan file</h2>
+<p>Save the following as <code>stan/simple_regression.stan</code> in your project directory. Every line is annotated.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// stan/simple_regression.stan</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">// Simple Bayesian linear regression:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">//   y_i ~ Normal(alpha + beta * x_i, sigma)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N; <span class="co">// number of observations</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] x;    <span class="co">// predictor (centred recommended)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;    <span class="co">// outcome</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha; <span class="co">// intercept</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta;  <span class="co">// slope</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma; <span class="co">// residual SD that must be positive</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- Priors ------------------------------------------</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="dv">10</span>);   <span class="co">// weakly informative</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  beta  ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);    <span class="co">// weakly informative</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);  <span class="co">// positive; mass on moderate values</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- Likelihood --------------------------------------</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  y ~ normal(alpha + beta * x, sigma);</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Posterior predictive replications</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Point-wise log-likelihood for LOO-CV (Chapter 14)</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    y_rep[i] = normal_rng(alpha + beta * x[i], sigma);</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    log_lik[i] = normal_lpdf(y[i] | alpha + beta * x[i], sigma);</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="anatomy-of-this-program" class="level3" data-number="4.5.1"><h3 data-number="4.5.1" class="anchored" data-anchor-id="anatomy-of-this-program">
+<span class="header-section-number">4.5.1</span> Anatomy of this program</h3>
+<p><strong><code>data</code> block.</strong><br>
+We declare <code>N</code> (an integer, at least 1) and two vectors of length <code>N</code>. Stan enforces these types and dimensions at runtime. If your R list passes a vector of length 30 but the data say <code>N = 45</code>, Stan will error immediately, before any sampling begins.</p>
+<p><strong><code>parameters</code> block.</strong><br><code>alpha</code> and <code>beta</code> are unconstrained reals. <code>sigma</code> is declared with <code>&lt;lower=0&gt;</code> but notice that Stan will transform it internally to sample on an unconstrained scale (via a log transform) and back-transform for you.</p>
+<p><strong><code>model</code> block.</strong><br>
+The <code>~</code> notation adds the log-density of the named distribution to the running log-posterior. The vectorised likelihood <code>y ~ normal(alpha + beta * x, sigma)</code> is equivalent to a loop over all <span class="math inline">\(N\)</span> observations but is faster and more readable.</p>
+<p><strong><code>generated quantities</code> block.</strong><br>
+This block runs <em>after</em> each posterior draw and is not part of the model fitting. It is the right place for:</p>
+<ul>
+<li>
+<strong>Posterior predictive draws</strong> (<code>y_rep</code>): one simulated dataset per posterior draw, used for posterior predictive checks.</li>
+<li>
+<strong>Point-wise log-likelihoods</strong> (<code>log_lik</code>): needed for LOO-CV model comparison (Chapter 14). I always include this block as it costs almost nothing and future you will be grateful.</li>
+</ul>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Vectorised vs loop likelihood.</strong><br>
+Both forms are equivalent in Stan:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// vectorised (preferred)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>y ~ normal(alpha + beta * x, sigma);</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">// loop (equivalent, slower)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  y[i] ~ normal(alpha + beta * x[i], sigma);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Prefer the vectorised form whenever possible. Stan can apply auto-differentiation more efficiently to vectorised expressions, and the code is easier to read.</p>
+</div>
+</div>
+</div>
+</section></section><section id="compiling-and-sampling" class="level2" data-number="4.6"><h2 data-number="4.6" class="anchored" data-anchor-id="compiling-and-sampling">
+<span class="header-section-number">4.6</span> Compiling and sampling</h2>
+<section id="step-1-compile" class="level3" data-number="4.6.1"><h3 data-number="4.6.1" class="anchored" data-anchor-id="step-1-compile">
+<span class="header-section-number">4.6.1</span> Step 1: compile</h3>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu">cmdstan_model</span><span class="op">(</span><span class="st">"stan/simple_regression.stan"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="step-2-prepare-the-data-list" class="level3" data-number="4.6.2"><h3 data-number="4.6.2" class="anchored" data-anchor-id="step-2-prepare-the-data-list">
+<span class="header-section-number">4.6.2</span> Step 2: prepare the data list</h3>
+<p>The names in the list must exactly match the <code>data</code> block variable names:</p>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">stan_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  N <span class="op">=</span> <span class="va">N</span>,</span>
+<span>  x <span class="op">=</span> <span class="va">x</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">y</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="step-3-sample" class="level3" data-number="4.6.3"><h3 data-number="4.6.3" class="anchored" data-anchor-id="step-3-sample">
+<span class="header-section-number">4.6.3</span> Step 3: sample</h3>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="va">mod</span><span class="op">$</span><span class="fu">sample</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">stan_data</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2026</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  iter_warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  iter_sampling <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fl">0</span>  <span class="co"># suppress iteration output in rendered doc</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With four chains of 1 000 sampling iterations each, we collect <span class="math inline">\(4 \times 1\,000 = 4\,000\)</span> posterior draws.</p>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Always save your fit to disk.</strong><br><code>cmdstanr</code> fit objects store posterior draws as CSV files in a temporary directory (<code>/tmp/</code> on Linux/macOS). Those files disappear when the R session ends. The <code>if (!file.exists(...))</code> is a pattern that helps with this by fitting the model once, saves it with <code>fit$save_object()</code>, and reloads it on subsequent renders. Delete the <code>.rds</code> file whenever you want to force a re-fit (e.g.&nbsp;after changing the model or the data). This pattern is used in every model chapter of this handbook.</p>
+</div>
+</div>
+</div>
+</section></section><section id="sec-convergence" class="level2" data-number="4.7"><h2 data-number="4.7" class="anchored" data-anchor-id="sec-convergence">
+<span class="header-section-number">4.7</span> Convergence diagnostics</h2>
+<p>Never interpret a Stan fit without checking convergence first.</p>
+<section id="the-summary-table" class="level3" data-number="4.7.1"><h3 data-number="4.7.1" class="anchored" data-anchor-id="the-summary-table">
+<span class="header-section-number">4.7.1</span> The summary table</h3>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 3 × 10
+#&gt;   variable   mean median     sd    mad     q5    q95  rhat ess_bulk ess_tail
+#&gt;   &lt;chr&gt;     &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+#&gt; 1 alpha    1.19   1.19   0.0392 0.0381 1.13   1.26   1.00     3003.    2143.
+#&gt; 2 beta     0.0681 0.0684 0.0149 0.0145 0.0431 0.0923 1.000    3725.    2731.
+#&gt; 3 sigma    0.256  0.253  0.0291 0.0280 0.214  0.309  1.00     3039.    2658.</code></pre>
+</div>
+</div>
+<p>Read each column:</p>
+<ul>
+<li>
+<strong><code>mean</code></strong> and <strong><code>median</code></strong>: posterior centre. Both should be close for symmetric posteriors.</li>
+<li>
+<strong><code>sd</code></strong>: posterior standard deviation, your uncertainty about the parameter.</li>
+<li>
+<strong><code>q5</code> / <code>q95</code></strong>: the 90% credible interval.</li>
+<li>
+<strong><code>rhat</code></strong>: <span class="math inline">\(\hat{R}\)</span>. Must be <span class="math inline">\(&lt; 1.01\)</span>. Values above this, signal that chains have not converged to the same distribution <span class="citation" data-cites="vehtari2021rank">(<a href="../references.html#ref-vehtari2021rank" role="doc-biblioref">Vehtari et al. 2021</a>)</span>.</li>
+<li>
+<strong><code>ess_bulk</code></strong> and <strong><code>ess_tail</code></strong>: effective sample sizes for the bulk and tails of the distribution. Aim for <span class="math inline">\(&gt; 400\)</span> each. Low ESS means the chain is autocorrelated and you need more iterations.</li>
+</ul>
+<div class="callout callout-style-simple callout-warning">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Always check <code>rhat</code> before reporting results.</strong><br>
+An <code>rhat</code> of 1.05 does not mean “almost converged”, it means the chains explored different parts of the posterior and the estimate is unreliable. If <code>rhat</code> <span class="math inline">\(\geq 1.01\)</span>: increase <code>iter_warmup</code>, check your priors, or look for model misspecification.</p>
+</div>
+</div>
+</div>
+</section><section id="trace-plots" class="level3" data-number="4.7.2"><h3 data-number="4.7.2" class="anchored" data-anchor-id="trace-plots">
+<span class="header-section-number">4.7.2</span> Trace plots</h3>
+<div class="cell">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">mcmc_trace</span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-trace" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-trace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-trace-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Trace plots for the three model parameters. All four chains overlap and show no trend or drift, the textbook “fuzzy caterpillar” pattern indicating healthy convergence.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="posterior-pair-plot" class="level3" data-number="4.7.3"><h3 data-number="4.7.3" class="anchored" data-anchor-id="posterior-pair-plot">
+<span class="header-section-number">4.7.3</span> Posterior pair plot</h3>
+<p>Pair plots reveal correlations between parameters. Strong correlation means the sampler must navigate a curved posterior which is not a problem per se, but worth knowing.</p>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">mcmc_pairs</span><span class="op">(</span></span>
+<span>  <span class="va">fit</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  off_diag_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>size <span class="op">=</span> <span class="fl">0.4</span>, alpha <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-pairs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-pairs-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.2: Posterior pair plot. The mild negative correlation between alpha and beta is expected when the predictor is nearly (but not perfectly) centred. Sigma is nearly independent of both location parameters.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The pair plot confirms healthy posterior geometry across all three parameters. The marginal distributions (diagonal) are unimodal and approximately symmetric for <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>, and slightly right-skewed for <span class="math inline">\(\sigma\)</span> which is expected for a standard deviation parameter constrained to be positive. The off-diagonal scatter plots show the joint posterior for each parameter pair: the (<span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>) panel (row 2, column 1) displays a mild negative correlation, which is typical when the predictor is centred but not perfectly balanced across plots. This correlation is weak enough that it poses no sampling difficulty and the point cloud is compact and round rather than elongated. The (<span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\sigma\)</span>) and (<span class="math inline">\(\beta\)</span>, <span class="math inline">\(\sigma\)</span>) panels show no meaningful correlation, confirming that the residual spread is estimated largely independently of the location parameters. Overall, the pair plot reveals no pathological geometry (no banana-shaped ridges, no multi-modality, no extreme elongation) indicating that the model is well-identified and the sampler explored the posterior efficiently.</p>
+</section></section><section id="sec-interpret" class="level2" data-number="4.8"><h2 data-number="4.8" class="anchored" data-anchor-id="sec-interpret">
+<span class="header-section-number">4.8</span> Interpreting the posterior</h2>
+<div class="cell">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract draws as a data frame</span></span>
+<span><span class="va">draws</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="marginal-posteriors" class="level3" data-number="4.8.1"><h3 data-number="4.8.1" class="anchored" data-anchor-id="marginal-posteriors">
+<span class="header-section-number">4.8.1</span> Marginal posteriors</h3>
+<div class="cell">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">true_vals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span>alpha <span class="op">=</span> <span class="va">true_alpha</span>, beta <span class="op">=</span> <span class="va">true_beta</span>, sigma <span class="op">=</span> <span class="va">true_sigma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">draws</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">alpha</span>, <span class="va">beta</span>, <span class="va">sigma</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"parameter"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">value</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_histogram</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="fu">after_stat</span><span class="op">(</span><span class="va">density</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                 bins <span class="op">=</span> <span class="fl">45</span>, fill <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_density</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>      parameter <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">true_vals</span><span class="op">)</span>,</span>
+<span>      value     <span class="op">=</span> <span class="va">true_vals</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    <span class="fu">aes</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="va">value</span><span class="op">)</span>,</span>
+<span>    linetype <span class="op">=</span> <span class="st">"dashed"</span>, colour <span class="op">=</span> <span class="st">"#c0392b"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">parameter</span>, scales <span class="op">=</span> <span class="st">"free"</span>, labeller <span class="op">=</span> <span class="va">label_parsed</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Parameter value"</span>, y <span class="op">=</span> <span class="st">"Density"</span>,</span>
+<span>       title <span class="op">=</span> <span class="st">"Marginal posteriors"</span>,</span>
+<span>       subtitle <span class="op">=</span> <span class="st">"Red dashed lines: true data-generating values"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-marginals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-marginals-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-marginals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.3: Marginal posterior distributions for the three parameters. Vertical dashed lines mark the true data-generating values (α = 1.20, β = 0.08, σ = 0.25). The posteriors are well-centred on the truth.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>All three marginal posteriors are unimodal, approximately symmetric, and well-centred on the true data-generating values (red dashed lines: <span class="math inline">\(\alpha = 1.20\)</span>, <span class="math inline">\(\beta = 0.08\)</span>, <span class="math inline">\(\sigma = 0.25\)</span>). The posterior for <span class="math inline">\(\alpha\)</span> is tightly concentrated between 1.10 and 1.30, reflecting strong information about the intercept at the mean temperature. The posterior for <span class="math inline">\(\beta\)</span> spans roughly 0.02 to 0.12, confirming a positive temperature effect on decomposition rate while retaining appropriate uncertainty given <span class="math inline">\(N = 45\)</span> plots. The posterior for <span class="math inline">\(\sigma\)</span> is slightly right-skewed, which is a universal feature of variance parameters constrained to be positive, with mass concentrated between 0.20 and 0.32, close to the generating value of 0.25.</p>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Why plot marginal posteriors after fitting?</strong></p>
+<p>Marginal posterior plots serve several practical purposes that a summary table alone cannot:</p>
+<ul>
+<li>
+<strong>Parameter recovery check.</strong> When working with simulated data (as here), overlaying the true value confirms the model and the sampler are both working correctly. <strong>A posterior that systematically misses the truth signals a bug in the Stan code or a data-preparation error.</strong>
+</li>
+<li>
+<strong>Shape diagnosis.</strong> A bimodal or heavily skewed posterior often indicates an identification problem as two parameter values explain the data equally well. This is invisible in a table of means and intervals.</li>
+<li>
+<strong>Prior-data conflict detection.</strong> If the posterior is pressed hard against the boundary of the prior, the prior may be too restrictive. The plots make this visible immediately.</li>
+<li>
+<strong>Communication.</strong> For non-technical collaborators or reviewers, a histogram of plausible values is more intuitive than a credible interval written as <span class="math inline">\([0.02, 0.12]\)</span>.</li>
+</ul>
+<p>On real data, where the truth is unknown, the marginal posteriors become your primary window into what the model has learned. Always inspect them before reporting any summary statistic.</p>
+</div>
+</div>
+</div>
+</section><section id="posterior-for-the-slope" class="level3" data-number="4.8.2"><h3 data-number="4.8.2" class="anchored" data-anchor-id="posterior-for-the-slope">
+<span class="header-section-number">4.8.2</span> Posterior for the slope</h3>
+<p>The slope <span class="math inline">\(\beta\)</span> is usually the parameter of scientific interest.</p>
+<div class="cell">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">beta_draws</span> <span class="op">&lt;-</span> <span class="va">draws</span><span class="op">$</span><span class="va">beta</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Posterior mean of beta:         "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">beta_draws</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Posterior mean of beta:          0.068</code></pre>
+</div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Posterior SD of beta:           "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">beta_draws</span><span class="op">)</span>,   <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Posterior SD of beta:            0.015</code></pre>
+</div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"90% credible interval:          "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta_draws</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"to"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta_draws</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 90% credible interval:           0.043 to 0.092</code></pre>
+</div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"P(beta &gt; 0 | data):             "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">beta_draws</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; P(beta &gt; 0 | data):              1</code></pre>
+</div>
+</div>
+<p>The posterior for <span class="math inline">\(\beta\)</span> is precisely estimated and unambiguously positive. The posterior mean of 0.068 indicates that each 1°C increase in mean annual temperature above the site mean is associated with an expected increase of 0.068 in log decomposition rate which correspond to a multiplicative factor of <span class="math inline">\(e^{0.068} \approx 1.07\)</span>, or roughly a 7% acceleration in decomposition per degree of warming. The true data-generating value was <span class="math inline">\(\beta = 0.08\)</span>; the posterior mean falls slightly below this, which is entirely normal sampling variation with <span class="math inline">\(N = 45\)</span> observations.</p>
+<p>The posterior standard deviation of 0.015 reflects moderate uncertainty: the 90% credible interval runs from 0.043 to 0.092, meaning the data are consistent with effects ranging from a modest 4% to a more substantial 10% acceleration per degree. Crucially, the entire interval lies above zero.</p>
+<p>The directional probability <span class="math inline">\(P(\beta &gt; 0 \mid \text{data}) = 1.000\)</span> means that not a single one of the 4 000 posterior draws fell below zero. This is strong evidence for a positive temperature effect, and a statement that a frequentist <span class="math inline">\(p\)</span>-value cannot make directly: it is a probability about the parameter itself, not about hypothetical replications of the experiment.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>A note on <span class="math inline">\(P(\beta &gt; 0 \mid \text{data}) = 1\)</span>.</strong><br>
+A value of exactly 1.000 (to three decimal places) does not mean certainty — it means the probability of a negative effect is smaller than <span class="math inline">\(1/4000 = 0.00025\)</span>, which is the resolution of our posterior sample. If you need a more precise lower bound, increase <code>iter_sampling</code> to 10 000 or more. In practice, <span class="math inline">\(P &gt; 0.99\)</span> is already strong evidence for a directional conclusion in most ecological applications.</p>
+</div>
+</div>
+</div>
+</section><section id="the-regression-line-and-its-uncertainty" class="level3" data-number="4.8.3"><h3 data-number="4.8.3" class="anchored" data-anchor-id="the-regression-line-and-its-uncertainty">
+<span class="header-section-number">4.8.3</span> The regression line and its uncertainty</h3>
+<p>Classical regression plots a single fitted line. A Bayesian analysis produces a <em>distribution</em> of plausible lines, one per posterior draw.</p>
+<div class="cell">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_seq</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">-</span> <span class="fl">0.5</span>, <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.5</span>, length.out <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Sample 200 draws for line display</span></span>
+<span><span class="va">idx</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>, <span class="fl">200</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lines_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">idx</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    x     <span class="op">=</span> <span class="va">x_seq</span>,</span>
+<span>    y     <span class="op">=</span> <span class="va">draws</span><span class="op">$</span><span class="va">alpha</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">+</span> <span class="va">draws</span><span class="op">$</span><span class="va">beta</span><span class="op">[</span><span class="va">i</span><span class="op">]</span> <span class="op">*</span> <span class="va">x_seq</span>,</span>
+<span>    draw  <span class="op">=</span> <span class="va">i</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Posterior mean line and 90% CI band</span></span>
+<span><span class="va">band_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">x_seq</span><span class="op">)</span></span>
+<span><span class="va">mu_mat</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html">outer</a></span><span class="op">(</span><span class="va">draws</span><span class="op">$</span><span class="va">alpha</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span><span class="op">(</span><span class="va">x_seq</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>           <span class="fu"><a href="https://rdrr.io/r/base/outer.html">outer</a></span><span class="op">(</span><span class="va">draws</span><span class="op">$</span><span class="va">beta</span>,  <span class="va">x_seq</span><span class="op">)</span></span>
+<span><span class="va">band_df</span><span class="op">$</span><span class="va">mean</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">mu_mat</span><span class="op">)</span></span>
+<span><span class="va">band_df</span><span class="op">$</span><span class="va">lo</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">mu_mat</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.05</span><span class="op">)</span></span>
+<span><span class="va">band_df</span><span class="op">$</span><span class="va">hi</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html">apply</a></span><span class="op">(</span><span class="va">mu_mat</span>, <span class="fl">2</span>, <span class="va">quantile</span>, <span class="fl">0.95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>data <span class="op">=</span> <span class="va">lines_df</span>,</span>
+<span>            <span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, group <span class="op">=</span> <span class="va">draw</span><span class="op">)</span>,</span>
+<span>            colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.05</span>, linewidth <span class="op">=</span> <span class="fl">0.35</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_ribbon</span><span class="op">(</span>data <span class="op">=</span> <span class="va">band_df</span>,</span>
+<span>              <span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, ymin <span class="op">=</span> <span class="va">lo</span>, ymax <span class="op">=</span> <span class="va">hi</span><span class="op">)</span>,</span>
+<span>              fill <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.20</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_line</span><span class="op">(</span>data <span class="op">=</span> <span class="va">band_df</span>,</span>
+<span>            <span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">mean</span><span class="op">)</span>,</span>
+<span>            colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, linewidth <span class="op">=</span> <span class="fl">1.1</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span>data <span class="op">=</span> <span class="va">decomp</span>,</span>
+<span>             <span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, size <span class="op">=</span> <span class="fl">1.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Temperature anomaly (°C, centred)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">log</span><span class="op">~</span><span class="va">decomposition</span><span class="op">~</span><span class="va">rate</span><span class="op">~</span><span class="op">(</span><span class="va">yr</span><span class="op">^</span><span class="op">{</span><span class="op">-</span><span class="fl">1</span><span class="op">}</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    title    <span class="op">=</span> <span class="st">"Posterior regression lines"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"200 posterior draws (light) · posterior mean (dark) · 90% CI (band)"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-regression-lines" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-regression-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-regression-lines-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-lines-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.4: Posterior regression lines. Each light line is one draw from the posterior for (α, β). The dark line is the posterior mean. The shaded band is the 90% credible interval for the conditional mean E[y|x]. Data points are shown in teal.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-ppc" class="level2" data-number="4.9"><h2 data-number="4.9" class="anchored" data-anchor-id="sec-ppc">
+<span class="header-section-number">4.9</span> Posterior predictive check</h2>
+<p>A <strong>posterior predictive check</strong> (PPC) asks: <em>if the model is correct, do datasets simulated from the posterior look like the data we actually collected?</em> If the answer is no, the model is misspecified in some identifiable way.</p>
+<p>The <code>generated quantities</code> block already computed <code>y_rep</code>, one simulated dataset per posterior draw. We use <code>bayesplot</code> to compare the distribution of replications with the observed data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_rep</span> <span class="op">&lt;-</span> <span class="fu">as_draws_matrix</span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="st">"y_rep"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ppc_dens_overlay</span><span class="op">(</span><span class="va">y</span>, <span class="va">y_rep</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, <span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior predictive check (density overlay)"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Dark: observed data and light: 50 posterior predictive datasets"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-ppc-dens" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc-dens-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-ppc-dens-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc-dens-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.5: Posterior predictive density overlay. The dark line is the observed data distribution; the light lines are 50 simulated datasets from the posterior. Good overlap indicates the normal linear model is a reasonable description of these data.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The density overlay shows good overall agreement between the observed data (dark line) and the 50 posterior predictive datasets (light lines). The observed distribution is unimodal, centred around <span class="math inline">\(\log k \approx 1.3\)</span>, and the cloud of replicated densities envelops it throughout its full range. This confirms that the normal linear model captures the central tendency and spread of the data adequately.</p>
+<p>Two minor features are worth noting. First, the observed density peak is slightly sharper than the average replicated peak. This suggest that the model may spread predictions marginally wider than the data strictly require but it is a mild over-dispersion that is unlikely to affect inference on <span class="math inline">\(\beta\)</span>. Second, a handful of light lines show secondary bumps near 0.5 and 2.0 that the observed data do not exhibit; these are expected random fluctuations given only <span class="math inline">\(N = 45\)</span> observations, not evidence of misspecification. Overall, no systematic discrepancy is detectable and the normal likelihood is a defensible choice for these data.</p>
+<div class="cell">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">ppc_intervals</span><span class="op">(</span><span class="va">y</span>, <span class="va">y_rep</span>, x <span class="op">=</span> <span class="va">x</span>, prob <span class="op">=</span> <span class="fl">0.5</span>, prob_outer <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Temperature anomaly (°C, centred)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">log</span><span class="op">~</span><span class="va">k</span><span class="op">)</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior predictive intervals"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"50% (thick) and 90% (thin) predictive intervals"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div id="fig-ppc-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-simple-linear-regression_files/figure-html/fig-ppc-intervals-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.6: Posterior predictive intervals for each observation. Points are observed y values; intervals are 50% (thick) and 90% (thin) predictive intervals. Most observations fall within their predictive interval, consistent with a well-specified model.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The interval plot reinforces the density overlay conclusion at the level of individual observations. The positive slope of both the observed points (dark) and the predictive interval centres (light) across the temperature gradient is clearly visible, consistent with the positive <span class="math inline">\(\beta\)</span> estimated above. The 90% predictive intervals (thin bars) contain the large majority of observed values, and the 50% intervals (thick bars) contain roughly half, both in line with what a well-calibrated model should produce.</p>
+<p>Interval width is approximately constant across the temperature range, as expected under the homoscedastic normal model: <span class="math inline">\(\sigma\)</span> does not depend on <span class="math inline">\(x\)</span>. If the intervals had widened or narrowed systematically with temperature, that would signal heteroscedasticity and motivate a model extension (for example, modelling <span class="math inline">\(\log \sigma\)</span> as a function of <span class="math inline">\(x\)</span>). No such pattern is visible here.</p>
+<p>One observation near <span class="math inline">\(x \approx 0\)</span>, <span class="math inline">\(\log k \approx 0.55\)</span> falls just below its 90% interval. With 45 observations, one or two points outside the 90% interval is statistically expected and does not constitute evidence against the model. If such a point were influential (high leverage), it would merit investigation; here, centred near the mean of <span class="math inline">\(x\)</span>, its leverage is low.</p>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>What to look for in a PPC.</strong></p>
+<ul>
+<li>
+<strong>Density overlay (<code>ppc_dens_overlay</code>)</strong>: the dark observed-data line should be plausibly consistent with the cloud of light replicated lines. Systematic displacement or different shape signals misspecification.</li>
+<li>
+<strong>Interval plot (<code>ppc_intervals</code>)</strong>: roughly 90% of observed points should fall within the 90% intervals. Systematic over- or under-dispersion is a sign that <span class="math inline">\(\sigma\)</span> is mis-estimated or the functional form is wrong.</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>PPC as a habit, not a formality.</strong><br>
+A posterior predictive check that passes, as here, is not merely a box to tick. It establishes the <em>licence</em> to interpret the posterior quantities (<span class="math inline">\(\beta\)</span>, credible intervals, predictive statements) at face value. A failing PPC, by contrast, signals that those quantities describe a model that does not match the data, and any inference drawn from them is suspect regardless of how small the credible intervals are.</p>
+</div>
+</div>
+</div>
+</section><section id="comparison-with-lm" class="level2" data-number="4.10"><h2 data-number="4.10" class="anchored" data-anchor-id="comparison-with-lm">
+<span class="header-section-number">4.10</span> Comparison with <code>lm()</code>
+</h2>
+<p>For a well-specified model with a large sample and a weakly informative prior, the Bayesian posterior mean and the OLS estimate converge. Let us verify this.</p>
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Classical OLS fit</span></span>
+<span><span class="va">lm_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">decomp</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Stan posterior means</span></span>
+<span><span class="va">stan_means</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">variable</span>, <span class="va">mean</span>, <span class="va">sd</span>, <span class="va">q5</span>, <span class="va">q95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># OLS estimates and confidence intervals</span></span>
+<span><span class="va">lm_ci</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span><span class="op">(</span><span class="va">lm_fit</span>, level <span class="op">=</span> <span class="fl">0.90</span><span class="op">)</span></span>
+<span><span class="va">lm_summary</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta"</span>, <span class="st">"sigma"</span><span class="op">)</span>,</span>
+<span>  ols_est  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_fit</span><span class="op">)</span><span class="op">[[</span><span class="st">"(Intercept)"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>               <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_fit</span><span class="op">)</span><span class="op">[[</span><span class="st">"x"</span><span class="op">]</span><span class="op">]</span>,</span>
+<span>               <span class="fu"><a href="https://rdrr.io/r/stats/sigma.html">sigma</a></span><span class="op">(</span><span class="va">lm_fit</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ols_lo   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">lm_ci</span><span class="op">[</span><span class="st">"(Intercept)"</span>, <span class="fl">1</span><span class="op">]</span>, <span class="va">lm_ci</span><span class="op">[</span><span class="st">"x"</span>, <span class="fl">1</span><span class="op">]</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  ols_hi   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">lm_ci</span><span class="op">[</span><span class="st">"(Intercept)"</span>, <span class="fl">2</span><span class="op">]</span>, <span class="va">lm_ci</span><span class="op">[</span><span class="st">"x"</span>, <span class="fl">2</span><span class="op">]</span>, <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Print side by side</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/merge.html">merge</a></span><span class="op">(</span><span class="va">stan_means</span>, <span class="va">lm_summary</span>, by <span class="op">=</span> <span class="st">"variable"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>    digits  <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Stan posterior vs OLS: estimates are nearly identical with</span></span>
+<span><span class="st">               weakly informative priors and N = 45."</span>,</span>
+<span>    col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Parameter"</span>, <span class="st">"Bayes mean"</span>, <span class="st">"Bayes SD"</span>,</span>
+<span>                  <span class="st">"Bayes 5%"</span>, <span class="st">"Bayes 95%"</span>,</span>
+<span>                  <span class="st">"OLS estimate"</span>, <span class="st">"OLS 5%"</span>, <span class="st">"OLS 95%"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Stan posterior vs OLS: estimates are nearly identical with weakly informative priors and N = 45.</caption>
+<colgroup>
+<col style="width: 12%">
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 16%">
+<col style="width: 9%">
+<col style="width: 10%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: right;">Bayes mean</th>
+<th style="text-align: right;">Bayes SD</th>
+<th style="text-align: right;">Bayes 5%</th>
+<th style="text-align: right;">Bayes 95%</th>
+<th style="text-align: right;">OLS estimate</th>
+<th style="text-align: right;">OLS 5%</th>
+<th style="text-align: right;">OLS 95%</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpha</td>
+<td style="text-align: right;">1.193</td>
+<td style="text-align: right;">0.039</td>
+<td style="text-align: right;">1.131</td>
+<td style="text-align: right;">1.258</td>
+<td style="text-align: right;">1.192</td>
+<td style="text-align: right;">1.130</td>
+<td style="text-align: right;">1.255</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.043</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.044</td>
+<td style="text-align: right;">0.093</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sigma</td>
+<td style="text-align: right;">0.256</td>
+<td style="text-align: right;">0.029</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">0.309</td>
+<td style="text-align: right;">0.249</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The estimates are nearly identical as expected when the prior is weakly informative and the sample is reasonably large. The two approaches differ in <em>what they guarantee</em>: OLS confidence intervals have frequentist coverage properties; Bayesian credible intervals are direct probability statements about the parameter given the data.</p>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>When will Stan and <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> differ?</strong><br>
+The two will diverge when:</p>
+<ol type="1">
+<li>The prior is informative (small <span class="math inline">\(N\)</span>, strong prior knowledge).</li>
+<li>The model is hierarchical: OLS has no principled way to handle partial pooling.</li>
+<li>The likelihood is non-Gaussian: OLS is no longer optimal.</li>
+</ol>
+<p>All three situations arise in later chapters.</p>
+</div>
+</div>
+</div>
+</section><section id="sec-workflow" class="level2" data-number="4.11"><h2 data-number="4.11" class="anchored" data-anchor-id="sec-workflow">
+<span class="header-section-number">4.11</span> The complete workflow at a glance</h2>
+<p>This workflow repeats in every model chapter. Memorise it now:</p>
+<div class="cell" data-cache="true" data-layout-align="center">
+<div class="cell-output-display">
+<div id="fig-linear-wklfw" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-linear-wklfw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div>
+<pre class="mermaid mermaid-js" data-label="fig-linear-wklfw">flowchart TD
+    A("**1. Write the Stan file**\ndata block → declare inputs\nparameters block → declare unknowns\nmodel block → priors + likelihood\ngenerated quantities → y_rep, log_lik"):::write
+    B("**2. Compile**\ncmdstan_model(...)"):::code
+    C("**3. Prepare data list**\nstan_data &lt;- list(N=, x=, y=)"):::code
+    D("**4. Sample**\nfit  400\ntrace plots: fuzzy caterpillars"):::check
+    F("**6. Interpret posterior**\nmarginal summaries\nposterior probability statements\nregression line + uncertainty band"):::interpret
+    G("**7. Posterior predictive check**\nppc_dens_overlay\nppc_intervals"):::check
+    H("**8. Save the fit**\nfit$save_object(...)"):::code
+
+    A --&gt; B --&gt; C --&gt; D --&gt; E
+    E --&gt;|"✅ converged"| F
+    E --&gt;|"❌ not converged"| A
+    F --&gt; G
+    G --&gt;|"✅ passes"| H
+    G --&gt;|"❌ fails"| A
+
+    classDef write     fill:#e8f4f2,stroke:#2e7d6a,color:#1a2e28,text-align:left
+    classDef code      fill:#2e7d6a,stroke:#1a4a40,color:#ffffff
+    classDef check     fill:#f5f0e8,stroke:#b8860b,color:#3a2e00
+    classDef interpret fill:#5c8a52,stroke:#3a6035,color:#ffffff
+</pre>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-linear-wklfw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.7: The complete Stan modelling workflow. Steps with a feedback arrow back to step 1 indicate situations that require revisiting the model specification: convergence failure (step 5) or a failing posterior predictive check (step 7).
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="summary" class="level2" data-number="4.12"><h2 data-number="4.12" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">4.12</span> Summary</h2>
+<ul>
+<li>Simple linear regression in Stan is written as three required blocks: <code>data</code> (inputs), <code>parameters</code> (unknowns), and <code>model</code> (priors + likelihood). A <code>generated quantities</code> block adds <code>y_rep</code> and <code>log_lik</code> at negligible cost.</li>
+<li>Stan enforces types and constraints at compile time. Declare <code>sigma</code> with <code>&lt;lower=0&gt;</code>. Stan handles the internal transformation.</li>
+<li>The vectorised likelihood <code>y ~ normal(alpha + beta * x, sigma)</code> is preferred over a loop: it is faster and easier to read.</li>
+<li>
+<strong>Always centre predictors.</strong> It improves interpretability and sampler efficiency.</li>
+<li>Convergence is assessed via <span class="math inline">\(\hat{R}\)</span> (target: <span class="math inline">\(&lt; 1.01\)</span>), ESS (target: <span class="math inline">\(&gt; 400\)</span>), and trace plots.</li>
+<li>The posterior predictive check using <code>y_rep</code> is the primary tool for detecting model misspecification.</li>
+<li>With weakly informative priors and <span class="math inline">\(N = 45\)</span>, Stan and <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> give essentially identical point estimates. The Bayesian framework earns its keep in hierarchical models, non-Gaussian likelihoods, and small samples.</li>
+</ul></section><section id="exercises" class="level2" data-number="4.13"><h2 data-number="4.13" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">4.13</span> Exercises</h2>
+<ol type="1">
+<li><p><strong>Parameter recovery.</strong> Change the true slope to <code>true_beta &lt;- 0.00</code> (no temperature effect). Re-run the full workflow. Does the 90% credible interval for <span class="math inline">\(\beta\)</span> contain zero? What is <span class="math inline">\(P(\beta &gt; 0 \mid \text{data})\)</span>? What would a frequentist analysis report?</p></li>
+<li><p><strong>Prior sensitivity.</strong> Refit the model with <code>beta ~ normal(0, 0.1)</code> (a tight prior near zero). How does the posterior mean for <span class="math inline">\(\beta\)</span> change? At what value of <span class="math inline">\(N\)</span> (try 10, 45, 200) does the prior stop mattering? Simulate datasets at each <span class="math inline">\(N\)</span> and compare.</p></li>
+<li><p><strong>Uncentred predictor.</strong> Refit with the raw (uncentred) temperature values. Look at the pair plot: how does the correlation between <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> change? Check <code>ess_bulk</code> for both fits. What does this tell you about why centring matters computationally?</p></li>
+<li>
+<p><strong>Predictive intervals.</strong> Using the posterior draws, compute the 90% <em>predictive</em> interval for a new observation at <span class="math inline">\(x = 3\)</span> (a plot 3°C above the site mean). Compare this with the 90% credible interval for the <em>conditional mean</em> at <span class="math inline">\(x = 3\)</span>. Why are they different widths?</p>
+<p><em>Hint</em>: the predictive interval must account for <span class="math inline">\(\sigma\)</span>; the credible interval for the mean does not.</p>
+<div class="cell">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">x_new</span> <span class="op">&lt;-</span> <span class="fl">3</span></span>
+<span><span class="va">mu_new</span>  <span class="op">&lt;-</span> <span class="va">draws</span><span class="op">$</span><span class="va">alpha</span> <span class="op">+</span> <span class="va">draws</span><span class="op">$</span><span class="va">beta</span> <span class="op">*</span> <span class="va">x_new</span>          <span class="co"># mean at x_new</span></span>
+<span><span class="va">y_new</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">draws</span><span class="op">)</span>, mean <span class="op">=</span> <span class="va">mu_new</span>,</span>
+<span>                 sd <span class="op">=</span> <span class="va">draws</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span>                    <span class="co"># new observation</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">mu_new</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span>                      <span class="co"># CI for mean</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">y_new</span>,  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span>                      <span class="co"># predictive interval</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</li>
+<li><p><strong>Extend to a second predictor.</strong> Soil moisture (%) is another driver of decomposition. Add a second centred predictor <code>z</code> (soil moisture) to the Stan file: a new <code>vector[N] z</code> in the <code>data</code> block, a new <code>real    gamma</code> parameter, and update the likelihood to <code>y ~ normal(alpha + beta * x + gamma * z, sigma)</code>. Simulate <code>z</code> correlated with temperature (<span class="math inline">\(r \approx 0.4\)</span>) and refit. Does including soil moisture reduce <span class="math inline">\(\sigma\)</span>?</p></li>
+</ol></section><section id="further-reading" class="level2" data-number="4.14"><h2 data-number="4.14" class="anchored" data-anchor-id="further-reading">
+<span class="header-section-number">4.14</span> Further reading</h2>
+<ul>
+<li>
+<span class="citation" data-cites="gelman2020regression">Gelman, Hill, and Vehtari (<a href="../references.html#ref-gelman2020regression" role="doc-biblioref">2020</a>, Ch. 7–10)</span>: thorough treatment of Bayesian regression, with worked examples close to the style of this chapter.</li>
+<li>
+<span class="citation" data-cites="mcelreath2020rethinking">McElreath (<a href="../references.html#ref-mcelreath2020rethinking" role="doc-biblioref">2020</a>, Ch. 4)</span>: builds linear regression up from Gaussian priors and grid approximation before moving to Stan.</li>
+<li>
+<span class="citation" data-cites="gelman2013bda">Gelman et al. (<a href="../references.html#ref-gelman2013bda" role="doc-biblioref">2013</a>, Ch. 14)</span>: the technical treatment of Bayesian regression including conjugate analysis and the matrix form.</li>
+<li>Stan User’s Guide, “Linear Regression” chapter: <a href="https://mc-stan.org/docs/stan-users-guide/regression.html" class="uri">https://mc-stan.org/docs/stan-users-guide/regression.html</a>
+</li>
+</ul>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-gelman2013bda" class="csl-entry" role="listitem">
+Gelman, Andrew, John B Carlin, Hal S Stern, David B Dunson, Aki Vehtari, and Donald B Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd ed. Boca Raton, FL: CRC Press.
+</div>
+<div id="ref-gelman2020regression" class="csl-entry" role="listitem">
+Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. <em>Regression and Other Stories</em>. Cambridge, UK: Cambridge University Press.
+</div>
+<div id="ref-mcelreath2020rethinking" class="csl-entry" role="listitem">
+McElreath, Richard. 2020. <em>Statistical Rethinking: A <span>Bayesian</span> Course with Examples in <span>R</span> and <span>Stan</span></em>. 2nd ed. Boca Raton, FL: CRC Press.
+</div>
+<div id="ref-vehtari2021rank" class="csl-entry" role="listitem">
+Vehtari, Aki, Andrew Gelman, Daniel Simpson, Bob Carpenter, and Paul-Christian Bürkner. 2021. <span>“Rank-Normalization, Folding, and Localization: An Improved <span><span class="math inline">\(\hat{R}\)</span></span> for Assessing Convergence of <span>MCMC</span>.”</span> <em>Bayesian Analysis</em> 16 (2): 667–718. <a href="https://doi.org/10.1214/20-BA1221">https://doi.org/10.1214/20-BA1221</a>.
+</div>
+</div>
+</section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/ebedthan\.github\.io\/stan-handbook\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script><nav class="page-navigation"><div class="nav-page nav-page-previous">
+      <a href="../chapters/03-bayesian-thinking.html" class="pagination-link" aria-label="Thinking Like a Bayesian">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Thinking Like a Bayesian</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/05-multiple-regression.html" class="pagination-link" aria-label="Multiple Regression and Predictors">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/Ebedthan/stan-handbook/edit/main/chapters/04-simple-linear-regression.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Ebedthan/stan-handbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>

@@ -1,0 +1,701 @@
+# Thinking Like a Bayesian
+
+```{r}
+#| label: setup-ch03
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+This chapter builds the conceptual foundation for everything that follows.
+Before touching Stan again, you need a working mental model of three ideas:
+the **likelihood**, the **prior**, and the **posterior**. You also need to understand how they combine through Bayes' theorem. And finally, you need an intuition for what Markov chain Monte Carlo (MCMC) is doing when Stan runs.
+
+None of this requires measure theory or a probability textbook. The goal is
+a set of pictures and metaphors that make the Stan output in later chapters
+feel *interpretable*, not mysterious.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- State Bayes' theorem in words and explain what each term means.
+- Distinguish the likelihood, the prior, and the posterior, and describe
+  how each one changes as data accumulate.
+- Explain intuitively what MCMC does and why we use samples rather than
+  closed-form solutions.
+- Describe three types of prior (flat, weakly informative, strongly
+  informative) and give a reason to prefer each.
+
+
+## A running example: soil nitrogen
+
+Throughout this chapter we use a concrete, agronomic example. Suppose you
+are measuring total nitrogen concentration (g kg⁻¹) in topsoil samples
+from a fallow plot in the forest-savanna transition zone of Côte d'Ivoire.
+You have a prior belief about nitrogen levels from the literature, you
+collect a small number of samples, and you want to update your knowledge.
+
+This is the Bayesian problem in miniature: combining what you knew before
+with what the data show.
+
+
+## Bayes' theorem
+
+Bayes' theorem is a statement about conditional probability. In the context
+of statistical modelling it reads:
+
+$$
+\underbrace{p(\theta \mid y)}_{\text{posterior}}
+\;\propto\;
+\underbrace{p(y \mid \theta)}_{\text{likelihood}}
+\times
+\underbrace{p(\theta)}_{\text{prior}}
+$$
+
+where $\theta$ is the parameter (or vector of parameters) you want to learn, and $y$ is the data you observed. The $\propto$ symbol means
+"proportional to". For informed reader, not that we drop the normalising constant $p(y)$ (the *marginal likelihood*) because Stan never needs to compute it.
+
+To gain a clear and in-depth understanding of the derivation of this formula, I highly recommend the [*Modern Probability Modeling*](https://pos5747.github.io/notes/) course by [Carlisle Rainey](https://www.carlislerainey.com/). It is one of my favorite resources on the subject.
+
+
+Let us unpack each term.
+
+### The prior: $p(\theta)$
+
+The prior encodes what you believe about $\theta$ *before seeing the data*.
+It is a probability distribution over all plausible values of $\theta$.
+
+For our nitrogen example we can draw on measured values from the literature.
+In mid-west Côte d'Ivoire, @yao2010 reported topsoil (0-10 cm) total
+nitrogen concentrations ranging from roughly 0.7 g kg⁻¹ in degraded
+cropland to around 1.6 g kg⁻¹ under secondary forest across several land
+use types. In the forest-savanna transition zone of central Côte d'Ivoire,
+@ilboudo2022 measured total nitrogen across 160 sites (0-20 cm) under
+different land uses, with values consistent with that range under natural
+vegetation. A comparable study in the forest-savanna transition of Cameroon
+found topsoil N of 1.6-2.5 g kg⁻¹ in native and fallow lands at 0-10 cm
+depth [@djouama2024]. Taken together, these studies suggest that in
+undisturbed or fallow plots of the West African forest-savanna mosaic, mean
+topsoil N values of approximately 1.0-1.8 g kg⁻¹ are plausible, with
+cropped and degraded soils falling below 1.0 g kg⁻¹.
+
+For a fallow plot in this system, a reasonable prior might therefore be:
+
+$$
+\mu \sim \text{Normal}(1.2, 0.4)
+$$
+
+This places 95% prior probability between 0.4 and 2.0 g kg⁻¹, ruling out values below zero or above 3 g kg⁻¹ as implausible, while remaining consistent with the range documented in the literature. The centre of 1.2 is conservative which is appropriate for a mixed fallow-forest landscape rather than claiming certainty about the exact habitat type.
+
+::: {.callout-note}
+**A prior is not a guess, It is a distribution.** That is a full description of your uncertainty before the experiment. A prior centred at 1.2 with a wide standard deviation expresses much less certainty than one centred at 1.2 with a narrow standard deviation. Both say the same thing about the centre; they say very different things about how much you trust it.
+:::
+
+### The likelihood: $p(y \mid \theta)$
+
+The likelihood measures *how probable the data are, given a particular value of $\theta$*. It is not a probability distribution over $\theta$, it is a function of $\theta$ that scores how well each candidate value of $\theta$ explains the data you actually observed.
+
+If we assume nitrogen measurements are approximately normally distributed,
+the likelihood for a single observation $y_i$ given mean $\mu$ and standard
+deviation $\sigma$ is:
+
+$$
+p(y_i \mid \mu, \sigma)
+= \frac{1}{\sigma\sqrt{2\pi}}
+  \exp\!\left(-\frac{(y_i - \mu)^2}{2\sigma^2}\right)
+$$
+
+For $N$ independent observations, the joint likelihood is the product:
+
+$$
+p(y \mid \mu, \sigma) = \prod_{i=1}^{N} p(y_i \mid \mu, \sigma)
+$$
+
+In practice, and in Stan, we work with the *log* likelihood because
+products of small numbers underflow numerically (I recommend a rapid check of the excellent explanation of Rainey's course [chapter on ML](https://pos5747.github.io/notes/wk02/01-maximum-likelihood.html)).
+
+### The posterior: $p(\theta \mid y)$
+
+The posterior is what you believe about $\theta$ *after seeing the data*. It combines the prior (what you knew) with the likelihood (what the data say) into an updated distribution.
+
+The posterior is the answer to your inferential question. Every credible interval, every probability statement, every prediction in this handbook comes from the posterior.
+
+
+## Updating in pictures
+
+The best way to feel Bayes' theorem is to watch the posterior shift as data
+arrive. @fig-updating shows three snapshots: the prior alone, the likelihood
+from five observations, and the resulting posterior.
+
+```{r}
+#| label: fig-updating
+#| fig-cap: >
+#|   Bayesian updating for soil nitrogen. The prior (dashed) encodes
+#|   pre-experiment knowledge. The likelihood (dotted) summarises the
+#|   information in five measurements. The posterior (solid) is their
+#|   product, renormalised. As data accumulate, the posterior narrows and
+#|   shifts toward the data.
+#| fig-width: 8
+#| fig-height: 5
+#| code-fold: true
+
+library(ggplot2)
+
+# Prior: Normal(1.2, 0.4)
+prior_mu  <- 1.2
+prior_sd  <- 0.4
+
+# Observed data (5 nitrogen measurements, g/kg)
+set.seed(42)
+y_obs <- rnorm(5, mean = 1.6, sd = 0.3)
+n     <- length(y_obs)
+
+# Known sigma for simplicity (we will relax this in Chapter 4)
+sigma <- 0.35
+
+# Conjugate posterior for Normal-Normal model
+# posterior mean and sd (known sigma case)
+post_var <- 1 / (1/prior_sd^2 + n/sigma^2)
+post_sd  <- sqrt(post_var)
+post_mu  <- post_var * (prior_mu/prior_sd^2 + sum(y_obs)/sigma^2)
+
+# Likelihood: proportional to Normal(ybar, sigma/sqrt(n))
+lik_mu <- mean(y_obs)
+lik_sd <- sigma / sqrt(n)
+
+mu_grid <- seq(0.2, 2.8, length.out = 500)
+
+df <- data.frame(
+  mu       = rep(mu_grid, 3),
+  density  = c(
+    dnorm(mu_grid, prior_mu, prior_sd),
+    dnorm(mu_grid, lik_mu,   lik_sd),
+    dnorm(mu_grid, post_mu,  post_sd)
+  ),
+  component = rep(
+    c("Prior  p(μ)",
+      "Likelihood  p(y|μ)",
+      "Posterior  p(μ|y)"),
+    each = length(mu_grid)
+  )
+)
+
+df$component <- factor(
+  df$component,
+  levels = c("Prior  p(μ)", "Likelihood  p(y|μ)", "Posterior  p(μ|y)")
+)
+
+cols <- c(
+  "Prior  p(μ)"          = "#aec6c8",
+  "Likelihood  p(y|μ)"   = "#5c8a52",
+  "Posterior  p(μ|y)"    = "#2e7d6a"
+)
+ltys <- c(
+  "Prior  p(μ)"          = "dashed",
+  "Likelihood  p(y|μ)"   = "dotted",
+  "Posterior  p(μ|y)"    = "solid"
+)
+
+ggplot(df, aes(mu, density, colour = component, linetype = component)) +
+  geom_line(linewidth = 1.0) +
+  geom_vline(xintercept = mean(y_obs), colour = "#5c8a52",
+             linetype = "dotted", alpha = 0.4) +
+  annotate("text", x = mean(y_obs) + 0.06, y = 2.55,
+           label = paste0("ȳ = ", round(mean(y_obs), 2)),
+           colour = "#5c8a52", size = 3.2, hjust = 0) +
+  scale_colour_manual(values = cols, name = NULL) +
+  scale_linetype_manual(values = ltys, name = NULL) +
+  scale_x_continuous(breaks = seq(0.4, 2.8, by = 0.4)) +
+  labs(
+    x = "μ  (mean soil nitrogen, g kg⁻¹)",
+    y = "Density"
+  ) +
+  theme(
+    legend.position  = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 9),
+    legend.key.width = unit(1.8, "cm")
+  )
+```
+
+Notice three things in @fig-updating:
+
+1. The **posterior lies between the prior and the likelihood**. It is a
+   weighted average, with the weights determined by relative precision.
+2. The posterior is **narrower** than either the prior or the likelihood
+   alone, combining two sources of information reduces uncertainty.
+3. When the data ($\bar{y} \approx$ `r round(mean(y_obs), 2)`) disagree with the prior centre (1.2), the posterior is pulled toward the data, because five measurements carry more information than a vague prior.
+
+### What happens as data accumulate?
+
+@fig-sequential shows the posterior after 1, 5, and 20 observations from the same generating process. As $N$ grows, the prior is overwhelmed and the posterior converges on the data-generating mean.
+
+```{r}
+#| label: fig-sequential
+#| fig-cap: >
+#|   Sequential Bayesian updating. Each new observation sharpens the
+#|   posterior. With 20 observations the prior is nearly irrelevant and
+#|   the posterior is tightly concentrated around the sample mean.
+#| fig-width: 8
+#| fig-height: 5
+#| code-fold: true
+
+set.seed(7)
+y_all <- rnorm(20, mean = 1.6, sd = 0.35)
+ns    <- c(1, 5, 20)
+
+posterior_params <- function(n_obs, y, prior_mu, prior_sd, sigma) {
+  pv  <- 1 / (1/prior_sd^2 + n_obs/sigma^2)
+  psd <- sqrt(pv)
+  pmu <- pv * (prior_mu/prior_sd^2 + sum(y[seq_len(n_obs)])/sigma^2)
+  list(mu = pmu, sd = psd)
+}
+
+rows <- lapply(ns, function(n_obs) {
+  pp <- posterior_params(n_obs, y_all, prior_mu, prior_sd, sigma)
+  data.frame(
+    mu      = mu_grid,
+    density = dnorm(mu_grid, pp$mu, pp$sd),
+    n_label = paste0("N = ", n_obs)
+  )
+})
+
+df_seq <- do.call(rbind, rows)
+df_seq$n_label <- factor(df_seq$n_label,
+                         levels = paste0("N = ", ns))
+
+prior_df <- data.frame(
+  mu = mu_grid,
+  density = dnorm(mu_grid, prior_mu, prior_sd),
+  n_label = "Prior"
+)
+prior_df$n_label <- factor(prior_df$n_label)
+
+seq_cols <- c(
+  "Prior" = "#cccccc",
+  "N = 1" = "#aec6c8",
+  "N = 5" = "#5c8a52",
+  "N = 20" = "#2e7d6a"
+)
+
+ggplot(
+  rbind(
+    transform(prior_df, n_label = "Prior"),
+    df_seq
+  ),
+  aes(mu, density,
+      colour = factor(n_label,
+                      levels = c("Prior", "N = 1", "N = 5", "N = 20")),
+      linewidth = factor(n_label,
+                         levels = c("Prior", "N = 1", "N = 5", "N = 20")))
+) +
+  geom_line() +
+  scale_colour_manual(values = seq_cols, name = "Posterior after") +
+  scale_linewidth_manual(
+    values = c("Prior" = 0.5, "N = 1" = 0.7, "N = 5" = 0.9, "N = 20" = 1.1),
+    name = "Posterior after"
+  ) +
+  scale_x_continuous(breaks = seq(0.4, 2.8, by = 0.4)) +
+  labs(x = "μ  (mean soil nitrogen, g kg⁻¹)", y = "Density") +
+  theme(legend.position = c(0.82, 0.72))
+```
+
+
+## Choosing a prior {#sec-priors}
+
+Perhaps no aspect of Bayesian analysis generates more anxiety, and more
+unnecessary debate, than prior choice. Here is a practical framework.
+
+### Flat (uninformative) priors
+
+A flat prior assigns equal density to all values of $\theta$:
+
+$$
+p(\theta) \propto 1
+$$
+
+This sounds appealing, "let the data speak",  but flat priors are often
+problematic in practice:
+
+- On bounded parameters (like $\sigma > 0$), a flat prior puts infinite mass near zero, which can cause sampling difficulties.
+- In hierarchical models, flat priors on variance components can lead to
+  improper posteriors.
+- "Flat" is not scale-invariant: a flat prior on $\sigma$ is not flat on
+  $\log \sigma$.
+
+Flat priors are rarely the right choice. Use them only when you genuinely have no information *and* you have verified the posterior is proper.
+
+### Weakly informative priors
+
+A weakly informative prior rules out values that are physically or
+biologically implausible, without strongly favouring any particular value in
+the plausible range:
+
+$$
+\mu \sim \text{Normal}(0, 10) \qquad \sigma \sim \text{Exponential}(1)
+$$
+
+These are the workhorses of applied Bayesian modelling and the defaults in this handbook. The `Normal(0, 10)` prior for a mean says: "I don't think the mean is outside the range (-20, 20), but within that range I have little preference." The `Exponential(1)` prior for a standard deviation says: "Values near zero are unlikely; moderate values are plausible; very large values are increasingly surprising."
+
+::: {.callout-tip}
+**A useful heuristic:** before fitting, ask yourself "what is the largest
+effect I could plausibly see in this system?" Set your prior so that this
+value lies somewhere in the 95% interval. If the largest plausible nitrogen
+difference between treatments is 1.5 g kg⁻¹, a `Normal(0, 1)` prior on
+a treatment effect (95% interval: -1.96, +1.96) is weakly informative.
+:::
+
+### Strongly informative priors
+
+When you have reliable external knowledge such as a well-studied system, a meta-analysis, replicated prior experiments, you can use an informative prior to incorporate that knowledge explicitly:
+
+$$
+\mu \sim \text{Normal}(1.2, 0.2)
+$$
+
+Strongly informative priors improve estimates when data are scarce. They also make your assumptions transparent: instead of hiding prior knowledge in a subjective choice of model structure, you state it as a distribution that can be inspected and challenged.
+
+@fig-prior-types shows the three prior families for a mean parameter.
+
+```{r}
+#| label: fig-prior-types
+#| fig-cap: >
+#|   Three prior types for a location parameter. The flat prior (dashed,
+#|   truncated for display) gives equal weight to implausible values.
+#|   The weakly informative prior rules out extremes without strong
+#|   commitment. The strongly informative prior encodes precise external
+#|   knowledge.
+#| fig-width: 13
+#| fig-height: 8
+#| code-fold: true
+
+mu_g <- seq(-4, 6, length.out = 600)
+
+df_priors <- data.frame(
+  mu = rep(mu_g, 3),
+  density = c(
+    dunif(mu_g, -10, 10) * 3,  # flat (scaled for display)
+    dnorm(mu_g, 0, 2),         # weakly informative
+    dnorm(mu_g, 1.2, 0.3)      # strongly informative
+  ),
+  type = rep(
+    c("Flat Uniform(−10, 10)",
+      "Weakly informative Normal(0, 2)",
+      "Strongly informative Normal(1.2, 0.3)"),
+    each = length(mu_g)
+  )
+)
+
+df_priors$type <- factor(
+  df_priors$type,
+  levels = c(
+    "Flat Uniform(−10, 10)",
+    "Weakly informative Normal(0, 2)",
+    "Strongly informative Normal(1.2, 0.3)"
+  )
+)
+
+pcols <- c(
+  "Flat Uniform(-10, 10)" = "#cccccc",
+  "Weakly informative Normal(0, 2)" = "#5c8a52",
+  "Strongly informative Normal(1.2, 0.3)" = "#2e7d6a"
+)
+pltys <- c(
+  "Flat Uniform(-10, 10)" = "dashed",
+  "Weakly informative Normal(0, 2)" = "solid",
+  "Strongly informative Normal(1.2, 0.3)" = "solid"
+)
+
+ggplot(df_priors, aes(mu, density, colour = type, linetype = type)) +
+  geom_line(linewidth = 0.9) +
+  scale_colour_manual(values = pcols, name = NULL) +
+  scale_linetype_manual(values = pltys, name = NULL) +
+  coord_cartesian(ylim = c(0, 1.5)) +
+  labs(x = "Parameter value (μ)", y = "Prior density") +
+  theme(
+    legend.position = "bottom",
+    legend.direction = "horizontal",
+    legend.text = element_text(size = 8.5),
+    legend.key.width = unit(1.5, "cm")
+  )
+```
+
+
+## What MCMC is doing {#sec-mcmc}
+
+For any realistically complex model, the posterior $p(\theta \mid y)$ cannot be computed analytically: the normalising constant $p(y)$ involves an integral over all possible values of $\theta$, which is intractable in more than a few dimensions. Instead, Stan uses **Markov chain Monte Carlo** (MCMC) to *sample* from the posterior without ever computing it directly.
+
+### The core idea
+
+Imagine the posterior as a landscape, where height represents probability density. The goal is to draw a map of this landscape by visiting locations in proportion to their height with spending more time in high-probability regions, less time in low-probability ones.
+
+MCMC builds a Markov chain, a sequence of parameter values $\theta^{(1)}, \theta^{(2)}, \ldots, \theta^{(S)}$, that, after a *warmup* period, visits each region of the parameter space in proportion to the posterior density. The resulting collection of draws is a **sample from the posterior**.
+
+From this sample you can compute any posterior summary:
+
+$$
+\mathbb{E}[\theta \mid y] \approx \frac{1}{S} \sum_{s=1}^{S} \theta^{(s)}
+\qquad
+\text{Var}[\theta \mid y] \approx \frac{1}{S-1}
+  \sum_{s=1}^{S}\!\left(\theta^{(s)} - \bar\theta\right)^2
+$$
+
+A 90% credible interval is simply the interval from the 5th to the 95th percentile of $\{\theta^{(s)}\}$.
+
+### Why Stan's MCMC is especially good
+
+Classic MCMC algorithms (Gibbs sampling, used by JAGS and BUGS) propose new parameter values by taking random steps. In high-dimensional or strongly-correlated posteriors, most random steps are rejected. This is due to the fact that the chain mixes slowly and you need millions of iterations to get reliable estimates.
+
+Rather, stan uses **Hamiltonian Monte Carlo** (HMC), which borrows an analogy from physics. It treats the negative log posterior as a potential energy surface and simulates the trajectory of a particle with momentum rolling across that surface. The particle moves efficiently through curved, high-dimensional posteriors that would defeat a random-walk sampler [@betancourt2017conceptual].
+
+The specific variant Stan uses — the **No-U-Turn Sampler** (NUTS) — also
+automatically tunes the step size and trajectory length during warmup, so
+you rarely need to touch these settings manually.
+
+@fig-mcmc-paths illustrates the difference in exploration efficiency
+between a slow random-walk chain and an efficient HMC path.
+
+```{r}
+#| label: fig-mcmc-paths
+#| fig-cap: >
+#|   Schematic comparison of Hamiltonian Monte Carlo (right) and
+#|   random-walk MCMC (left) on a 
+#|   correlated bivariate posterior. The random walk
+#|   takes many small, mostly rejected steps. HMC follows smooth
+#|   trajectories that traverse the posterior efficiently.
+#| fig-width: 8
+#| fig-height: 4
+#| echo: false
+
+set.seed(17)
+
+# Simulate a correlated bivariate target (elongated ellipse)
+Sigma <- matrix(c(1, 0.85, 0.85, 1), 2, 2)
+L     <- chol(Sigma)
+
+# Random-walk path (small steps, slow exploration)
+rw_path <- matrix(c(0, 0), nrow = 1)
+for (i in seq_len(300)) {
+  proposal <- tail(rw_path, 1) + rnorm(2, 0, 0.18) %*% L
+  log_r    <- -(sum(proposal^2) - sum(tail(rw_path,1)^2)) / 2
+  if (log(runif(1)) < log_r) {
+    rw_path <- rbind(rw_path, proposal)
+  } else {
+    rw_path <- rbind(rw_path, tail(rw_path, 1))
+  }
+}
+rw_df <- data.frame(
+  x = rw_path[, 1], y = rw_path[, 2],
+  step = seq_len(nrow(rw_path)),
+  method = "Hamiltonian Monte Carlo"
+)
+
+# HMC-like smooth trajectory (simulate leapfrog arcs)
+hmc_pts <- list(c(-1.5, -1.5))
+for (i in seq_len(18)) {
+  start  <- tail(hmc_pts, 1)[[1]]
+  theta  <- runif(1, 0, 2*pi)
+  radius <- runif(1, 0.6, 1.4)
+  arc    <- seq(theta, theta + runif(1, pi*0.4, pi*0.9), length.out = 12)
+  pts    <- lapply(arc, function(a)
+    start + c(radius * cos(a), radius * 0.55 * sin(a)) %*% L)
+  hmc_pts <- c(hmc_pts, pts)
+}
+hmc_mat <- do.call(rbind, hmc_pts)
+hmc_df  <- data.frame(
+  x = hmc_mat[, 1], y = hmc_mat[, 2],
+  step = seq_len(nrow(hmc_mat)),
+  method = "Random-walk MCMC"
+)
+
+# Contour data
+grid  <- expand.grid(x = seq(-3, 3, length.out = 80),
+                     y = seq(-3, 3, length.out = 80))
+z_val <- with(grid,
+  exp(-0.5 * (x^2 - 2*0.85*x*y + y^2) / (1 - 0.85^2)))
+grid$z <- z_val
+
+both <- rbind(hmc_df, rw_df)
+
+ggplot() +
+  geom_contour(data = grid, aes(x, y, z = z),
+               colour = "grey80", linewidth = 0.35, bins = 7) +
+  geom_path(data = both,
+            aes(x, y, colour = method, alpha = step),
+            linewidth = 0.55, show.legend = FALSE) +
+  geom_point(data = both[seq(1, nrow(both), by = 6), ],
+             aes(x, y, colour = method),
+             size = 1.0, alpha = 0.6) +
+  scale_colour_manual(
+    values = c("Random-walk MCMC" = "#c0392b",
+               "Hamiltonian Monte Carlo" = "#2e7d6a"),
+    name = NULL
+  ) +
+  scale_alpha_continuous(range = c(0.2, 0.9), guide = "none") +
+  facet_wrap(~method) +
+  labs(x = expression(theta[1]), y = expression(theta[2])) +
+  theme(
+    strip.text      = element_text(face = "bold", size = 10),
+    legend.position = "none"
+  )
+```
+
+### Warmup and sampling phases
+
+Stan's sampler runs in two phases:
+
+**Warmup** (`iter_warmup`, default 1000): the chain explores the posterior
+and automatically tunes its step size and mass matrix. *Warmup draws are discarded*, they are not part of your posterior sample.
+
+**Sampling** (`iter_sampling`, default 1000): the tuned chain draws samples
+that are retained for inference.
+
+With four chains, the default settings give $4 \times 1000 = 4000$ posterior draws which are usually more than enough for well-behaved models.
+
+### Multiple chains
+
+Stan runs several chains (typically four) starting from different random
+initial values. If all chains converge to the same region of the posterior,
+that is strong evidence of a valid result. The $\hat{R}$ statistic measures
+this agreement: values close to 1.00 indicate that between-chain variance
+equals within-chain variance, as expected when all chains explore the same
+distribution [@vehtari2021rank].
+
+## From posterior draws to answers
+
+Once you have posterior draws, every inferential question is a calculation:
+
+```{r}
+#| label: tbl-posterior-calc
+#| echo: false
+#| tbl-cap: "Translating questions into posterior calculations."
+
+df_calc <- data.frame(
+  Question = c(
+    "What is the most likely value of μ?",
+    "How uncertain am I about μ?",
+    "What is the 90% credible interval for μ?",
+    "P(μ > 1.5)?",
+    "What will a new observation look like?"
+  ),
+  Calculation = c(
+    "median(draws$mu)",
+    "sd(draws$mu)",
+    "quantile(draws$mu, c(0.05, 0.95))",
+    "mean(draws$mu > 1.5)",
+    "draws$y_rep  (from generated quantities)"
+  )
+)
+
+knitr::kable(df_calc, col.names = c("Inferential question", "R calculation on draws"))
+```
+
+This is the practical payoff of Bayesian inference: answers to questions
+that matter for decision-making, expressed as probabilities rather than
+binary hypothesis tests.
+
+
+## The Bayesian workflow
+
+Before closing, it helps to see how the three concepts discussed here (prior, likelihood,
+posterior) fit into a complete analysis cycle (@fig-workflow). This cycle
+recurs in every chapter of this handbook.
+
+```{mermaid}
+%%| label: fig-workflow
+%%| echo: false
+%%| fig-cap: >
+%%|   The Bayesian modelling workflow. Arrows show the flow from scientific
+%%|   question to posterior and back. Prior predictive checks (Chapter 13)
+%%|   and posterior predictive checks (Chapters 4-12) close the loop.
+
+flowchart LR
+    A("🔬 Scientific\nquestion"):::question
+    B("📐 Prior\np(θ)"):::prior
+    C("📊 Likelihood\np(y | θ)"):::likelihood
+    D("🔍 Prior predictive\ncheck"):::check
+    E("✅ Posterior\np(θ | y)"):::posterior
+    F("🔄 Posterior predictive\ncheck"):::check
+
+    A  -->|"encode\nbeliefs"| B
+    B  -->|"simulate\ndata"| D
+    B  -->|"× data"| E
+    C  -->|"× prior"| E
+    A  -->|"choose\nmodel"| C
+    E  -->|"simulate\nnew data"| F
+    F  -->|"refine\nmodel"| A
+
+    classDef question   fill:#e8f4f2,stroke:#2e7d6a,color:#1a2e28,font-weight:bold
+    classDef prior      fill:#aec6c8,stroke:#2e7d6a,color:#1a2e28,font-weight:bold
+    classDef likelihood fill:#5c8a52,stroke:#3a6035,color:#ffffff,font-weight:bold
+    classDef posterior  fill:#2e7d6a,stroke:#1a4a40,color:#ffffff,font-weight:bold
+    classDef check      fill:#f5f0e8,stroke:#b8860b,color:#3a2e00,font-weight:bold
+```
+
+
+## Summary
+
+- **Bayes' theorem** combines the prior $p(\theta)$ and the likelihood
+  $p(y \mid \theta)$ into the posterior $p(\theta \mid y)$. The posterior
+  is proportional to their product.
+- The **prior** encodes pre-experiment knowledge as a distribution over
+  parameters. Weakly informative priors are the practical default: they rule
+  out implausible values without dominating the data.
+- The **likelihood** scores how probable the observed data are under each
+  candidate parameter value. It is a function of $\theta$, not a
+  distribution over $\theta$.
+- The **posterior** narrows and shifts toward the data as observations
+  accumulate. With enough data, the prior is overwhelmed.
+- **MCMC** draws samples from the posterior without computing it directly.
+  Stan uses Hamiltonian Monte Carlo, which is efficient in high dimensions.
+  Multiple chains and the $\hat{R}$ diagnostic provide convergence assurance.
+- Every posterior quantity (mean, interval, probability statement,
+  prediction) is a simple calculation on the sample of draws.
+
+
+## Exercises
+
+1. **Prior sensitivity.** Using the conjugate normal model from Chapter 2,
+   fit the same data three times with: (a) `Normal(0, 10)`, (b)
+   `Normal(0, 0.5)`, and (c) `Normal(5, 0.2)` as the prior on `mu`.
+   For each fit, extract the posterior mean and 90% credible interval.
+   How much does the prior influence the posterior? At what sample size does
+   the influence disappear?
+
+2. **Posterior probabilities.** Fit the nitrogen model from this chapter
+   (or any normal model). Using the posterior draws, compute:
+   (a) $P(\mu > 1.5 \mid y)$, (b) $P(0.8 < \mu < 2.0 \mid y)$, and
+   (c) the posterior probability that a new observation will exceed 2.5.
+   Write the one-line R code for each.
+
+3. **Prior predictive simulation.** Before fitting, draw 1 000 values of
+   $\mu$ from `Normal(1.2, 0.4)` and $\sigma$ from `Exponential(1)`. For
+   each pair $(\mu, \sigma)$, draw one observation from
+   `Normal(mu, sigma)`. Plot the resulting distribution of synthetic
+   observations. Does the prior imply any nitrogen values you would
+   consider physically implausible? Adjust the prior and repeat.
+   *(We will formalise this as prior predictive checks in Chapter 13.)*
+
+4. **Credible interval vs confidence interval.** A 95% Bayesian credible
+   interval $[a, b]$ means: "Given the data and the prior, there is a 95%
+   probability that $\theta$ lies in $[a, b]$." A frequentist 95%
+   confidence interval means something subtly different. Write one or two
+   sentences explaining the difference in plain language. Which
+   interpretation is more useful for an agronomist making a management
+   decision?
+
+## Further reading
+
+- @mcelreath2020rethinking [Ch. 2–3]: the best intuitive treatment of
+  Bayes' theorem for life scientists, using grid approximation to build
+  visual understanding before MCMC.
+- @gelman2013bda [Ch. 1–2]: the authoritative technical treatment; skim
+  Ch. 1 for perspective and Ch. 2 for the conjugate normal model worked
+  out in full.
+- @betancourt2017conceptual: if you want to understand *why* HMC works,
+  §2–3 give a geometric intuition without requiring physics background.
+- @vehtari2021rank: the definitive reference for $\hat{R}$ and ESS;
+  explains why the older $\hat{R}$ was subtly flawed and what the
+  rank-normalised version fixes.

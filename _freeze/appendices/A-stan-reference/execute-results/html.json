@@ -1,0 +1,15 @@
+{
+  "hash": "f3bf2758672ef2549874f338256ebe83",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Stan Language Quick Reference\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Overview\n\nBlock structure, data types, distributions, and vectorisation cheat sheet.\n\n## Learning objectives\n\nBy the end of this chapter you will be able to:\n\n- [ ] Objective 1\n- [ ] Objective 2\n- [ ] Objective 3\n\n## Content\n\n*Content to be written.*\n\n## Exercises\n\n1. Exercise 1\n2. Exercise 2\n\n## Summary\n\n*Summary to be written.*\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

@@ -1,0 +1,189 @@
+# Why Stan?
+
+```{r}
+#| label: setup-ch01
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+Before writing a single line of Stan code, it is worth asking an honest question: *why bother?* R already provides `lm()`, `aov()`, `glm()`, and a rich ecosystem of mixed-model packages. Bayesian wrappers like **brms** can fit hierarchical models with a formula interface nearly as simple as `lmer()`. So what does writing Stan directly buy you?
+
+This chapter answers that question. It positions Stan in the landscape of statistical software, explains what probabilistic programming actually means, and makes the case that the effort of learning Stan pays dividends that no wrapper can fully replicate.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- Explain the difference between *fitting a model* and *specifying a model*.
+
+- Describe what Stan does and how it differs from classical statistical software and from higher-level Bayesian wrappers.
+
+- Articulate at least three concrete reasons why writing Stan directly is worth the investment for a practicing life scientist.
+
+
+## The gap between fitting and specifying
+
+When you call `lm(yield ~ treatment + block, data = field_trial)`, you are *fitting* a model which means R finds parameter estimates and standard errors, and returns them. What you are not doing is *specifying* a model. The statistical assumptions (normal errors, constant variance, independence) are baked in. The algorithm (ordinary least squares in this case) is fixed. There is no mechanism for expressing what you know about crop yields before seeing the data.
+
+This works well most of the time. For a balanced, replicated field trial with continuous outcomes, `lm()` is hard to beat. But life-science data are rarely this clean:
+
+- Outcomes are often counts, proportions, or presence/absence.
+
+- Observations are grouped (plots within farms, samples within subjects, leaves within trees) and genuinely not independent.
+
+- Sample sizes are small and estimates are uncertain in ways that a single point estimate and standard error cannot capture.
+
+- Prior knowledge (about plausible effect sizes, about measurement error,
+  about the biology) exists and could (and I think should whenever possible) inform the analysis.
+
+As soon as one of these complications arises, black-box software either forces you into a pre-built model family or invites you to ignore the problem entirely. Stan takes a different stance: *you write the model, Stan fits it.*
+
+
+## What Stan is
+
+Stan is a **probabilistic programming language** designed for Bayesian statistical modelling [@stan2017]. You write a program that encodes:
+
+1. **The data** you will observe.
+2. **The parameters** you want to learn.
+3. **The model** which is how the data arise from the parameters (the likelihood) and what you believe about the parameters before seeing the data (the prior).
+
+Stan then uses **Hamiltonian Monte Carlo** (HMC), specifically the No-U-Turn Sampler (NUTS), to draw samples from the *posterior distribution* of your parameters given your data [@betancourt2017conceptual]. Those samples are your inferential output: you can compute means, medians, credible intervals, predictions, and model comparisons directly from them.
+
+A Stan program for a simple normal model looks like this:
+
+```stan
+data {
+  int<lower=1> N;       // number of observations
+  vector[N] y;          // outcome variable
+}
+
+parameters {
+  real mu;              // population mean
+  real<lower=0> sigma;  // standard deviation (must be positive)
+}
+
+model {
+  // Priors
+  mu ~ normal(0, 10);
+  sigma ~ exponential(1);
+
+  // Likelihood
+  y ~ normal(mu, sigma);
+}
+```
+
+Fifteen lines of model code. Every assumption is explicit. Every prior is a deliberate choice, not a hidden default. This is the core promise of Stan.
+
+
+## Stan in the landscape
+
+It helps to know where Stan sits relative to other tools you may have heard of (@tbl-landscape).
+
+| Tool | Paradigm | Strength | Limitation |
+|---|---|---|---|
+| `lm()`, `aov()` | Frequentist | Fast, exact, well-understood | Fixed model family, no priors |
+| `lme4`, `nlme` | Frequentist / REML | Mixed models, widely used | Convergence issues, limited family |
+| JAGS / BUGS | Bayesian (MCMC) | Flexible, mature | Slow, Gibbs sampling, old syntax |
+| **brms** | Bayesian (Stan backend) | Formula interface, powerful | Limited when you need a custom model |
+| **Stan** | Bayesian (HMC) | Full flexibility, fast sampler | Steeper learning curve |
+| PyMC | Bayesian (various) | Python ecosystem | Python, not R |
+
+: Statistical modelling tools and their trade-offs. {#tbl-landscape}
+
+Here, **brms** deserves special mention because it uses Stan under the hood. For standard model families (linear, generalised linear, multilevel) brms is excellent and you should use it. The case for writing Stan directly arises when your model goes beyond what brms's formula language can express:
+
+- Custom likelihood functions (e.g., zero-inflated models with non-standard zero-generating processes).
+
+- Mechanistic models where parameters have biological meaning and constraints (e.g., compartmental models, growth curves).
+
+- Spatial models with structured priors (ICAR, Gaussian processes).
+
+- Multi-response models with complex covariance structure.
+
+- Anything where the *parameterisation* matters for sampling efficiency.
+
+::: {.callout-note}
+**brms and Stan are not competitors.** Many practitioners use brms for routine models and write Stan directly when the problem demands it. Learning Stan makes you a better brms user too, because you can read the Stan code brms generates (via `brms::stancode()`) and understand exactly what is being fitted.
+:::
+
+
+## Three reasons to learn Stan
+
+### Your model is your analysis
+
+In classical software, the model lives in the function call. In Stan, the model lives in a file you can read, edit, version-control, and share. This has practical consequences:
+
+- **Reviewers and collaborators** can check your statistical assumptions directly, not just the software you called.
+
+- **You** can iterate on the model, tightening a prior, adding a
+  covariate, changing the likelihood, without hunting for a new function.
+  
+- **Reproducibility** is structural: the `.stan` file is the model.
+
+### Uncertainty is first-class
+
+Stan returns *distributions*, not point estimates. For a slope parameter $\beta$, you do not get a single number and a $p$-value; you get thousands of plausible values of $\beta$ drawn from the posterior. You can then ask questions that $p$-values cannot answer:
+
+- What is the probability that $\beta > 0$?
+
+- What is the 90% credible interval for the expected yield difference between treatments?
+
+- If I had to act on this result, what range of outcomes should I plan for?
+
+This matters especially in applied ecology and agronomy, where the cost of a wrong decision is real and decisions are made under genuine uncertainty.
+
+### Small samples, rare events, partial information
+
+Bayesian methods, and Stan in particular, handle small samples gracefully because prior information contributes to inference when data are sparse. A frequentist mixed model may fail to converge with five observations per group; a Stan model with a sensible prior will return a posterior that honestly reflects both the data and the prior, with appropriately wide uncertainty.
+
+This is not a trick or a way to manufacture certainty from thin air. It is a principled mechanism for combining what you knew before the experiment with what you learned from it.
+
+
+## What this handbook will teach you
+
+This handbook takes you from the `.stan` file for a simple linear regression all the way to hierarchical models, generalised linear models, and the practical skills (diagnostics, model comparison, debugging) that let you use Stan confidently in your own research.
+
+The path follows your existing statistical knowledge:
+
+```
+lm()  =>  Chapter 4 (simple linear regression in Stan)
+aov() =>  Chapters 6-7 (one-way and two-way ANOVA in Stan)
+lmer() => Chapters 8-10 (hierarchical models in Stan)
+glm()  => Chapters 11-12 (GLMs in Stan)
+```
+
+Each step translates something you already know into Stan's language. By the time you reach the end, you will not just know *how* to use Stan, you will understand *why* your model works, and you will be equipped to build models that no wrapper package can express.
+
+
+## Summary
+
+- **Stan is a probabilistic programming language** for Bayesian statistical modelling. You write the model; Stan fits it.
+
+- Unlike classical software, Stan does not fix the model family or the algorithm. Every assumption is explicit and every prior is a deliberate choice.
+
+- Stan uses **Hamiltonian Monte Carlo** to draw samples from the posterior distribution of your parameters.
+
+- **brms** covers most standard models via a formula interface. Stan is the right tool when your model goes beyond what brms can express, or when you need full control over parameterisation.
+
+- Three core benefits: (1) the model is a legible artefact; (2) uncertainty is first-class; (3) principled handling of small samples and prior information.
+
+
+## Exercises
+
+1. Open the help page for `brms::stancode()`. Fit a simple linear regression with `brm(y ~ x, data = mydata, family = gaussian())` and then call `stancode()` on the result. Read the generated Stan program. Which blocks do you recognise? Which parts are unfamiliar?
+
+2. Think of a modelling problem from your own field where `lm()` or `aov()` feels inadequate. Write a short paragraph describing the problem. We will return to problems like this throughout the handbook.
+
+3. Stan's website (<https://mc-stan.org>) hosts a *Case Studies* section. Browse the titles and find one that relates to ecology, agriculture, or biology. Read the introduction and note: (a) what the model is trying to infer, and (b) why a standard approach would be insufficient.
+
+## Further reading
+
+- @mcelreath2020rethinking [Ch. 1], a compelling philosophical case for
+  Bayesian modelling, aimed squarely at life scientists.
+- @gelman2020regression [Ch. 1–2], contextualises regression as a general
+  inferential tool, not just a prediction machine.
+- @betancourt2017conceptual, a conceptual introduction to HMC for readers
+  who want to understand *why* Stan's sampler is better than Gibbs sampling.
+- Stan documentation: <https://mc-stan.org/docs/stan-users-guide/>

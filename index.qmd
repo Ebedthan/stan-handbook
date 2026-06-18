@@ -1,0 +1,45 @@
+# Preface {.unnumbered}
+
+```{r}
+#| label: setup
+#| include: false
+source("R/setup.R")
+```
+
+This handbook teaches you to write statistical models directly in **Stan**, the probabilistic programming language behind many modern Bayesian workflows.
+
+## Who this book is for {.unnumbered}
+
+You are a life scientist, agronomist, or ecologist who:
+
+- is comfortable fitting linear models and ANOVA in R,
+- has heard of Bayesian statistics but found it abstract,
+- wants to move beyond black-box software and understand *what the model is actually doing*.
+
+No prior knowledge of Stan or Bayesian inference is assumed. Familiarity with R and `lm()` / `aov()` is sufficient to begin.
+
+## How to use this handbook {.unnumbered}
+
+Each chapter introduces one model family, shows a complete Stan program, and walks through interpretation and diagnostics. **Every code block is runnable**, you can copy it into your own script and experiment.
+
+The chapters in **Part II** (linear models and ANOVA) are the heart of the book. Parts III-IV build on them progressively. Part V gives you the habits that separate a competent Stan user from a self-sufficient one.
+
+## Software versions {.unnumbered}
+
+```{r}
+#| label: versions
+#| echo: false
+pkg_info <- lapply(c("cmdstanr", "posterior", "bayesplot", "loo"),
+                   function(p) tryCatch(packageVersion(p), error = function(e) "not installed"))
+names(pkg_info) <- c("cmdstanr", "posterior", "bayesplot", "loo")
+knitr::kable(
+  data.frame(Package = names(pkg_info), Version = sapply(pkg_info, as.character)),
+  caption = "Key R packages used throughout this handbook."
+)
+```
+
+Stan version and CmdStan path are reported by `cmdstanr::cmdstan_version()`.
+
+## Acknowledgements {.unnumbered}
+
+I thank Bruno Herault for giving me the advice of considering Bayesian modelling instead of frequential modelling. I also thank him for the day when he said, "you will need to write this model in stan and not stick with brms", from that day, I gave myself to stan.

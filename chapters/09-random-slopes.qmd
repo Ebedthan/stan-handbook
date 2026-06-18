@@ -1,0 +1,32 @@
+# Random Slopes and Varying Effects
+
+```{r}
+#| label: setup-09-random-slopes
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+Multivariate normal priors, Cholesky parameterisation, and repeated-measures examples.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Content
+
+*Content to be written.*
+
+## Exercises
+
+1. Exercise 1
+2. Exercise 2
+
+## Summary
+
+*Summary to be written.*

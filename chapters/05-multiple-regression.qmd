@@ -1,0 +1,32 @@
+# Multiple Regression and Predictors
+
+```{r}
+#| label: setup-05-multiple-regression
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+Centring predictors, vectorised notation, and posterior predictive checks.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Content
+
+*Content to be written.*
+
+## Exercises
+
+1. Exercise 1
+2. Exercise 2
+
+## Summary
+
+*Summary to be written.*

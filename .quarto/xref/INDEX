@@ -1,0 +1,68 @@
+{
+  "index.qmd": {
+    "index.html": "16d8706f"
+  },
+  "chapters/01-why-stan.qmd": {
+    "01-why-stan.html": "1b502b92"
+  },
+  "chapters/02-setup.qmd": {
+    "02-setup.html": "52dcc8bf"
+  },
+  "chapters/03-bayesian-thinking.qmd": {
+    "03-bayesian-thinking.html": "d0d428ad"
+  },
+  "chapters/04-simple-linear-regression.qmd": {
+    "04-simple-linear-regression.html": "aeefad0f"
+  },
+  "chapters/05-multiple-regression.qmd": {
+    "05-multiple-regression.html": "2c40f090"
+  },
+  "chapters/06-one-way-anova.qmd": {
+    "06-one-way-anova.html": "57721882"
+  },
+  "chapters/07-two-way-anova.qmd": {
+    "07-two-way-anova.html": "86b928ef"
+  },
+  "chapters/08-intro-hierarchical.qmd": {
+    "08-intro-hierarchical.html": "de4c85d3"
+  },
+  "chapters/09-random-slopes.qmd": {
+    "09-random-slopes.html": "b1b935f6"
+  },
+  "chapters/10-non-centred.qmd": {
+    "10-non-centred.html": "8fc0d0d3"
+  },
+  "chapters/11-glm.qmd": {
+    "11-glm.html": "4b363966"
+  },
+  "chapters/12-ordinal-categorical.qmd": {
+    "12-ordinal-categorical.html": "0ca2ceab"
+  },
+  "chapters/13-prior-predictive.qmd": {
+    "13-prior-predictive.html": "e1a4eb93"
+  },
+  "chapters/14-model-comparison.qmd": {
+    "14-model-comparison.html": "be99a375"
+  },
+  "chapters/15-debugging.qmd": {
+    "15-debugging.html": "c3fedf32"
+  },
+  "chapters/16-publication.qmd": {
+    "16-publication.html": "d1e5d41a"
+  },
+  "appendices/A-stan-reference.qmd": {
+    "A-stan-reference.html": "78f523bc"
+  },
+  "appendices/B-prior-gallery.qmd": {
+    "B-prior-gallery.html": "77f7a3bf"
+  },
+  "appendices/C-mcmc-diagnostics.qmd": {
+    "C-mcmc-diagnostics.html": "aec5d376"
+  },
+  "appendices/D-further-reading.qmd": {
+    "D-further-reading.html": "f5e89cbf"
+  },
+  "references.qmd": {
+    "references.html": "b3f8f2cb"
+  }
+}

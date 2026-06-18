@@ -1,0 +1,462 @@
+{
+    "sources": [
+        {
+            "author": [
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                },
+                {
+                    "family": "Carlin",
+                    "given": "John B"
+                },
+                {
+                    "family": "Stern",
+                    "given": "Hal S"
+                },
+                {
+                    "family": "Dunson",
+                    "given": "David B"
+                },
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                },
+                {
+                    "family": "Rubin",
+                    "given": "Donald B"
+                }
+            ],
+            "edition": "3",
+            "id": "gelman2013bda",
+            "issued": {
+                "date-parts": [
+                    [
+                        2013
+                    ]
+                ]
+            },
+            "publisher": "CRC Press",
+            "publisher-place": "Boca Raton, FL",
+            "title": "Bayesian data analysis",
+            "type": "book"
+        },
+        {
+            "author": [
+                {
+                    "family": "McElreath",
+                    "given": "Richard"
+                }
+            ],
+            "edition": "2",
+            "id": "mcelreath2020rethinking",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "publisher": "CRC Press",
+            "publisher-place": "Boca Raton, FL",
+            "title": "Statistical rethinking: A Bayesian course with examples in R and Stan",
+            "title-short": "Statistical rethinking",
+            "type": "book"
+        },
+        {
+            "author": [
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                },
+                {
+                    "family": "Hill",
+                    "given": "Jennifer"
+                },
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                }
+            ],
+            "id": "gelman2020regression",
+            "issued": {
+                "date-parts": [
+                    [
+                        2020
+                    ]
+                ]
+            },
+            "publisher": "Cambridge University Press",
+            "publisher-place": "Cambridge, UK",
+            "title": "Regression and other stories",
+            "type": "book"
+        },
+        {
+            "DOI": "10.18637/jss.v076.i01",
+            "author": [
+                {
+                    "family": "Carpenter",
+                    "given": "Bob"
+                },
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                },
+                {
+                    "family": "Hoffman",
+                    "given": "Matthew D"
+                },
+                {
+                    "family": "Lee",
+                    "given": "Daniel"
+                },
+                {
+                    "family": "Goodrich",
+                    "given": "Ben"
+                },
+                {
+                    "family": "Betancourt",
+                    "given": "Michael"
+                },
+                {
+                    "family": "Brubaker",
+                    "given": "Marcus"
+                },
+                {
+                    "family": "Guo",
+                    "given": "Jiqiang"
+                },
+                {
+                    "family": "Li",
+                    "given": "Peter"
+                },
+                {
+                    "family": "Riddell",
+                    "given": "Allen"
+                }
+            ],
+            "container-title": "Journal of Statistical Software",
+            "id": "stan2017",
+            "issue": "1",
+            "issued": {
+                "date-parts": [
+                    [
+                        2017
+                    ]
+                ]
+            },
+            "page": "1-32",
+            "title": "Stan: A probabilistic programming language",
+            "title-short": "Stan",
+            "type": "article-journal",
+            "volume": "76"
+        },
+        {
+            "DOI": "10.1214/20-BA1221",
+            "author": [
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                },
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                },
+                {
+                    "family": "Simpson",
+                    "given": "Daniel"
+                },
+                {
+                    "family": "Carpenter",
+                    "given": "Bob"
+                },
+                {
+                    "family": "Bürkner",
+                    "given": "Paul-Christian"
+                }
+            ],
+            "container-title": "Bayesian Analysis",
+            "id": "vehtari2021rank",
+            "issue": "2",
+            "issued": {
+                "date-parts": [
+                    [
+                        2021
+                    ]
+                ]
+            },
+            "page": "667-718",
+            "title": "Rank-normalization, folding, and localization: An improved $\\hat{R}$ for assessing convergence of MCMC",
+            "title-short": "Rank-normalization, folding, and localization",
+            "type": "article-journal",
+            "volume": "16"
+        },
+        {
+            "DOI": "10.1007/s11222-016-9696-4",
+            "author": [
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                },
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                },
+                {
+                    "family": "Gabry",
+                    "given": "Jonah"
+                }
+            ],
+            "container-title": "Statistics and Computing",
+            "id": "vehtari2017practical",
+            "issue": "5",
+            "issued": {
+                "date-parts": [
+                    [
+                        2017
+                    ]
+                ]
+            },
+            "page": "1413-1432",
+            "title": "Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC",
+            "type": "article-journal",
+            "volume": "27"
+        },
+        {
+            "author": [
+                {
+                    "family": "Betancourt",
+                    "given": "Michael"
+                }
+            ],
+            "container-title": "arXiv preprint arXiv:1701.02434",
+            "id": "betancourt2017conceptual",
+            "issued": {
+                "date-parts": [
+                    [
+                        2017
+                    ]
+                ]
+            },
+            "title": "A conceptual introduction to Hamiltonian Monte Carlo",
+            "type": "article-journal"
+        },
+        {
+            "URL": "https://mc-stan.org/cmdstanr/",
+            "author": [
+                {
+                    "family": "Gabry",
+                    "given": "Jonah"
+                },
+                {
+                    "family": "Češnovar",
+                    "given": "Rok"
+                },
+                {
+                    "family": "Johnson",
+                    "given": "Andrew"
+                }
+            ],
+            "id": "cmdstanr",
+            "issued": {
+                "date-parts": [
+                    [
+                        2024
+                    ]
+                ]
+            },
+            "title": "Cmdstanr: R interface to CmdStan",
+            "title-short": "Cmdstanr",
+            "type": "book"
+        },
+        {
+            "URL": "https://mc-stan.org/bayesplot/",
+            "author": [
+                {
+                    "family": "Gabry",
+                    "given": "Jonah"
+                },
+                {
+                    "family": "Simpson",
+                    "given": "Daniel"
+                },
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                },
+                {
+                    "family": "Betancourt",
+                    "given": "Michael"
+                },
+                {
+                    "family": "Gelman",
+                    "given": "Andrew"
+                }
+            ],
+            "id": "bayesplot",
+            "issued": {
+                "date-parts": [
+                    [
+                        2024
+                    ]
+                ]
+            },
+            "title": "Bayesplot: Plotting for Bayesian models",
+            "title-short": "Bayesplot",
+            "type": "book"
+        },
+        {
+            "author": [
+                {
+                    "family": "Yao",
+                    "given": "Michel K."
+                },
+                {
+                    "family": "Angui",
+                    "given": "Pascal K. T."
+                },
+                {
+                    "family": "Konaté",
+                    "given": "Souleymane"
+                },
+                {
+                    "family": "Tondoh",
+                    "given": "Jérôme E."
+                },
+                {
+                    "family": "Tano",
+                    "given": "Yao"
+                },
+                {
+                    "family": "Abbadie",
+                    "given": "Luc"
+                },
+                {
+                    "family": "Bernest",
+                    "given": "D."
+                }
+            ],
+            "container-title": "European Journal of Scientific Research",
+            "id": "yao2010",
+            "issue": "2",
+            "issued": {
+                "date-parts": [
+                    [
+                        2010
+                    ]
+                ]
+            },
+            "page": "211-222",
+            "title": "Effects of land use types on soil organic carbon and nitrogen dynamics in Mid-West Côte d’Ivoire",
+            "type": "article-journal",
+            "volume": "40"
+        },
+        {
+            "DOI": "10.5194/egusphere-2022-209",
+            "author": [
+                {
+                    "family": "Ilboudo",
+                    "given": "Tegawende Léa Jeanne"
+                },
+                {
+                    "family": "Diby",
+                    "given": "Lucien NGuessan"
+                },
+                {
+                    "family": "Kiba",
+                    "given": "Delwendé Innocent"
+                },
+                {
+                    "family": "Vågen",
+                    "given": "Tor Gunnar"
+                },
+                {
+                    "family": "Winowiecki",
+                    "given": "Leigh Ann"
+                },
+                {
+                    "family": "Nacro",
+                    "given": "Hassan Bismarck"
+                },
+                {
+                    "family": "Six",
+                    "given": "Johan"
+                },
+                {
+                    "family": "Frossard",
+                    "given": "Emmanuel"
+                }
+            ],
+            "id": "ilboudo2022",
+            "issued": {
+                "date-parts": [
+                    [
+                        2022
+                    ]
+                ]
+            },
+            "note": "Study area: Tiéningboué, centre of Côte d’Ivoire",
+            "publisher": "EGUsphere preprint",
+            "title": "Relationship between the stocks of carbon in non-cultivated trees and soils in a West African forest–savanna transition zone",
+            "type": ""
+        },
+        {
+            "DOI": "10.1016/j.geodrs.2024.e00555",
+            "author": [
+                {
+                    "family": "Djouama",
+                    "given": "T."
+                },
+                {
+                    "literal": "others"
+                }
+            ],
+            "container-title": "Geoderma Regional",
+            "id": "djouama2024",
+            "issued": {
+                "date-parts": [
+                    [
+                        2024
+                    ]
+                ]
+            },
+            "title": "Variability of soil organic carbon and nutrient content across land uses and agriculturally induced land use changes in the forest-savanna transition zone of Cameroon",
+            "type": "article-journal"
+        },
+        {
+            "URL": "https://mc-stan.org/posterior/",
+            "author": [
+                {
+                    "family": "Bürkner",
+                    "given": "Paul-Christian"
+                },
+                {
+                    "family": "Gabry",
+                    "given": "Jonah"
+                },
+                {
+                    "family": "Kay",
+                    "given": "Matthew"
+                },
+                {
+                    "family": "Vehtari",
+                    "given": "Aki"
+                }
+            ],
+            "id": "posterior",
+            "issued": {
+                "date-parts": [
+                    [
+                        2024
+                    ]
+                ]
+            },
+            "title": "Posterior: Tools for working with posterior distributions",
+            "title-short": "Posterior",
+            "type": "book"
+        }
+    ],
+    "project_biblios": [
+        "references.bib"
+    ]
+}

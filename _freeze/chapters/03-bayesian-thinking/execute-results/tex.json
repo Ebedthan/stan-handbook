@@ -1,0 +1,19 @@
+{
+  "hash": "522fcd528b2461d302405fd9d41e6fdc",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Thinking Like a Bayesian\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Overview\n\nLikelihood, prior, posterior, and MCMC intuition — without the measure theory.\n\n## Learning objectives\n\nBy the end of this chapter you will be able to:\n\n- [ ] Objective 1\n- [ ] Objective 2\n- [ ] Objective 3\n\n## Content\n\n*Content to be written.*\n\n## Exercises\n\n1. Exercise 1\n2. Exercise 2\n\n## Summary\n\n*Summary to be written.*\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}

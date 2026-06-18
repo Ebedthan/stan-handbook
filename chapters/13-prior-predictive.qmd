@@ -1,0 +1,32 @@
+# Prior Predictive Checks
+
+```{r}
+#| label: setup-13-prior-predictive
+#| include: false
+source("../R/setup.R")
+```
+
+## Overview
+
+Simulating from the prior before fitting to catch unreasonable assumptions early.
+
+## Learning objectives
+
+By the end of this chapter you will be able to:
+
+- [ ] Objective 1
+- [ ] Objective 2
+- [ ] Objective 3
+
+## Content
+
+*Content to be written.*
+
+## Exercises
+
+1. Exercise 1
+2. Exercise 2
+
+## Summary
+
+*Summary to be written.*

@@ -1,0 +1,8 @@
+cmdstanr
+posterior
+bayesplot
+loo
+ggplot2
+dplyr
+tidyr
+patchwork

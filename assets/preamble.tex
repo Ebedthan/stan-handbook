@@ -1,0 +1,40 @@
+% assets/preamble.tex
+% Extra LaTeX for the PDF output of the Stan handbook
+
+% ── Fonts ────────────────────────────────────────────────────────────────────
+\usepackage{fontenc}
+\usepackage{lmodern}
+
+% ── Math ─────────────────────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, bm}
+
+% ── Stan listings ────────────────────────────────────────────────────────────
+\usepackage{listings}
+\lstdefinelanguage{Stan}{
+  keywords={data, parameters, transformed, model, generated, quantities,
+            functions, int, real, vector, matrix, array, lower, upper,
+            for, in, if, else, while, return, target},
+  keywordstyle=\color[HTML]{2e7d6a}\bfseries,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color[HTML]{8B0000},
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color[HTML]{cccccc},
+  backgroundcolor=\color[HTML]{f5f7f5}
+}
+
+% ── Callout boxes ─────────────────────────────────────────────────────────────
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+
+% ── Hyperlinks ────────────────────────────────────────────────────────────────
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = {blue!60!black},
+  citecolor  = {green!50!black},
+  urlcolor   = {blue!80!black}
+}

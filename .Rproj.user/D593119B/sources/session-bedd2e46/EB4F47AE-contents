@@ -1,0 +1,109 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Writing Statistical Models in Stan"
+  subtitle: "A Practical Handbook for Life Scientists"
+  author: "Anicet Ebou"
+  date: "2026-06-16"
+  reader-mode: true
+  doi: ""
+  site-url: "https://ebedthan.github.io/stan-handbook/"
+  repo-url: "https://github.com/Ebedthan/stan-handbook"
+  repo-branch: main
+  repo-actions: [edit, issue]
+  search: true
+  cover-image: assets/img/cover.png
+
+  chapters:
+    - index.qmd
+
+    - part: "Getting Started"
+      chapters:
+        - chapters/01-why-stan.qmd
+        - chapters/02-setup.qmd
+        - chapters/03-bayesian-thinking.qmd
+
+    - part: "The Linear World"
+      chapters:
+        - chapters/04-simple-linear-regression.qmd
+        - chapters/05-multiple-regression.qmd
+        - chapters/06-one-way-anova.qmd
+        - chapters/07-two-way-anova.qmd
+
+    - part: "Hierarchical Models"
+      chapters:
+        - chapters/08-intro-hierarchical.qmd
+        - chapters/09-random-slopes.qmd
+        - chapters/10-non-centred.qmd
+
+    - part: "Beyond the Normal"
+      chapters:
+        - chapters/11-glm.qmd
+        - chapters/12-ordinal-categorical.qmd
+
+    - part: "Good Practice and Going Further"
+      chapters:
+        - chapters/13-prior-predictive.qmd
+        - chapters/14-model-comparison.qmd
+        - chapters/15-debugging.qmd
+        - chapters/16-publication.qmd
+
+    - part: "Appendices"
+      chapters:
+        - appendices/A-stan-reference.qmd
+        - appendices/B-prior-gallery.qmd
+        - appendices/C-mcmc-diagnostics.qmd
+        - appendices/D-further-reading.qmd
+
+  appendices:
+    - references.qmd
+
+bibliography: references.bib
+#csl: assets/apa.csl
+
+format:
+  html:
+    theme: [cosmo, assets/custom.scss]
+    code-link: true
+    highlight-style: github
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    fig-align: center
+    fig-width: 7
+    fig-height: 4.5
+    callout-appearance: simple
+    code-overflow: wrap
+
+  pdf:
+    documentclass: scrbook
+    classoption: [oneside, openany]
+    papersize: a4
+    fontsize: 11pt
+    linestretch: 1.25
+    geometry:
+      - top=25mm
+      - bottom=25mm
+      - left=30mm
+      - right=25mm
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    colorlinks: true
+    linkcolor: "blue!60!black"
+    include-in-header: assets/preamble.tex
+    highlight-style: tango
+
+execute:
+  warning: false
+  message: false
+  cache: true
+  freeze: auto
+
+knitr:
+  opts_chunk:
+    comment: "#>"
+    fig.retina: 2
+    out.width: "95%"

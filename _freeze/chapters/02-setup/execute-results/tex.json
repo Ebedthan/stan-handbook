@@ -1,0 +1,19 @@
+{
+  "hash": "d38630ae953fe40722a36f904934fd1d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Setting Up Your Environment\n\n\n\n\n\n\n\n\n\n\n\n\n\n## Overview\n\nInstalling CmdStanR, verifying the toolchain, and running your first Stan program.\n\n## Learning objectives\n\nBy the end of this chapter you will be able to:\n\n- [ ] Objective 1\n- [ ] Objective 2\n- [ ] Objective 3\n\n## Content\n\n*Content to be written.*\n\n## Exercises\n\n1. Exercise 1\n2. Exercise 2\n\n## Summary\n\n*Summary to be written.*\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {
+      "knitr": [
+        "{\"type\":\"list\",\"attributes\":{},\"value\":[]}"
+      ]
+    },
+    "preserve": null,
+    "postProcess": false
+  }
+}

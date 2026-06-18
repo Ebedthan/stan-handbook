@@ -1,0 +1,15 @@
+{
+  "hash": "fabd4090adc4e77ccced142db227eec9",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Preface {.unnumbered}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nThis handbook teaches you to write statistical models directly in **Stan**, the probabilistic programming language behind many modern Bayesian workflows.\n\n## Who this book is for {.unnumbered}\n\nYou are a life scientist, agronomist, or ecologist who:\n\n- is comfortable fitting linear models and ANOVA in R,\n- has heard of Bayesian statistics but found it abstract,\n- wants to move beyond black-box software and understand *what the model is actually doing*.\n\nNo prior knowledge of Stan or Bayesian inference is assumed. Familiarity with R and `lm()` / `aov()` is sufficient to begin.\n\n## How to use this handbook {.unnumbered}\n\nEach chapter introduces one model family, shows a complete Stan program, and walks through interpretation and diagnostics. **Every code block is runnable**, you can copy it into your own script and experiment.\n\nThe chapters in **Part II** (linear models and ANOVA) are the heart of the book. Parts III-IV build on them progressively. Part V gives you the habits that separate a competent Stan user from a self-sufficient one.\n\n## Software versions {.unnumbered}\n\n\n\n\n\n\n\n\n::: {.cell}\n::: {.cell-output-display}\n\n\nTable: Key R packages used throughout this handbook.\n\n|          |Package   |Version |\n|:---------|:---------|:-------|\n|cmdstanr  |cmdstanr  |0.9.0   |\n|posterior |posterior |1.7.0   |\n|bayesplot |bayesplot |1.15.0  |\n|loo       |loo       |2.9.0   |\n\n\n:::\n:::\n\n\n\n\n\n\n\n\nStan version and CmdStan path are reported by `cmdstanr::cmdstan_version()`.\n\n## Acknowledgements {.unnumbered}\n\nI thank Bruno Herault for giving me the advice of considering Bayesian modelling instead of frequential modelling. I also thank him for the day when he said, \"you will need to write this model in stan and not stick with brms\", from that day, I gave myself to stan.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

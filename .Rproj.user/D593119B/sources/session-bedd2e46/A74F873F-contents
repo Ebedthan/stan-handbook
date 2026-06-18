@@ -1,0 +1,31 @@
+/*-- scss:defaults --*/
+
+// Fonts
+$font-family-sans-serif: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+$font-family-monospace:  "Fira Code", "Cascadia Code", "Courier New", monospace;
+$font-size-root: 16px;
+
+// Brand colours (teal/forest palette fitting a ecology/agronomy book)
+$primary:   #2e7d6a;
+$secondary: #5c8a52;
+$light:     #f5f7f5;
+$dark:      #1a2e28;
+
+/*-- scss:rules --*/
+
+// Chapter headings
+h1.title { color: $primary; }
+
+// Callout tweaks
+.callout-tip    { border-left-color: $primary   !important; }
+.callout-warning{ border-left-color: #d4890a    !important; }
+.callout-note   { border-left-color: $secondary !important; }
+
+// Stan code blocks, subtle background
+pre.stan { background-color: #f0f5f4; }
+
+// Tighter figure captions
+.figure-caption { font-size: 0.88em; color: #555; }
+
+// Part title pages
+.quarto-part-title { color: $primary; border-bottom: 2px solid $secondary; }
