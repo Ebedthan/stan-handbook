@@ -1,4 +1,4 @@
-# Writing Statistical Models in Stan — Source
+# Writing Statistical Models in Stan - Source
 
 Quarto book source for *Writing Statistical Models in Stan: A Practical Handbook for Life Scientists*.
 
@@ -54,12 +54,6 @@ quarto render --to html
 # Single chapter (fast iteration)
 quarto render chapters/04-simple-linear-regression.qmd
 ```
-
-## Citation style
-
-Download `apa.csl` from <https://github.com/citation-style-language/styles>
-and place it in `assets/apa.csl`, or replace with any other CSL file and
-update `_quarto.yml` accordingly.
 
 ## Freezing computations
 
