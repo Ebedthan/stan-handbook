@@ -51,7 +51,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
@@ -67,12 +87,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -98,7 +116,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
@@ -107,7 +150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">Part II - The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/05-multiple-regression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/05-multiple-regression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -119,9 +162,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Writing Statistical Models in Stan</a> 
-        <div class="sidebar-tools-main tools-wide">
+        <div class="sidebar-tools-main">
     <a href="https://github.com/Ebedthan/stan-handbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
   <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
   <div class="quarto-reader-toggle-btn">
   <i class="bi"></i>
@@ -146,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Part I - Getting Started</span></a>
+ <span class="menu-text">Getting Started</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -175,7 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Part II - The Linear World</span></a>
+ <span class="menu-text">The Linear World</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -210,7 +252,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Part III - Hierarchical Models</span></a>
+ <span class="menu-text">Hierarchical Models</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -239,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Part IV - Beyond the Normal</span></a>
+ <span class="menu-text">Beyond the Normal</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -262,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Part V - Good Practice and Going Further</span></a>
+ <span class="menu-text">Good Practice and Going Further</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -355,17 +397,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">5.1</span> Overview</a></li>
-  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">5.2</span> Learning objectives</a></li>
-  <li><a href="#content" id="toc-content" class="nav-link" data-scroll-target="#content"><span class="header-section-number">5.3</span> Content</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">5.4</span> Exercises</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5.5</span> Summary</a></li>
+  <li><a href="#sec-model-ch05" id="toc-sec-model-ch05" class="nav-link" data-scroll-target="#sec-model-ch05"><span class="header-section-number">5.2</span> The model</a></li>
+  <li><a href="#running-example-drivers-of-litter-decomposition" id="toc-running-example-drivers-of-litter-decomposition" class="nav-link" data-scroll-target="#running-example-drivers-of-litter-decomposition"><span class="header-section-number">5.3</span> Running example: drivers of litter decomposition</a></li>
+  <li>
+<a href="#sec-stan-file-ch05" id="toc-sec-stan-file-ch05" class="nav-link" data-scroll-target="#sec-stan-file-ch05"><span class="header-section-number">5.4</span> The Stan file</a>
+  <ul class="collapse">
+<li><a href="#what-changed-from-chapter-4" id="toc-what-changed-from-chapter-4" class="nav-link" data-scroll-target="#what-changed-from-chapter-4"><span class="header-section-number">5.4.1</span> What changed from Chapter 4</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-fit-ch05" id="toc-sec-fit-ch05" class="nav-link" data-scroll-target="#sec-fit-ch05"><span class="header-section-number">5.5</span> Compiling and sampling</a></li>
+  <li><a href="#convergence-diagnostics" id="toc-convergence-diagnostics" class="nav-link" data-scroll-target="#convergence-diagnostics"><span class="header-section-number">5.6</span> Convergence diagnostics</a></li>
+  <li>
+<a href="#sec-interpret-ch05" id="toc-sec-interpret-ch05" class="nav-link" data-scroll-target="#sec-interpret-ch05"><span class="header-section-number">5.7</span> Interpreting the posterior</a>
+  <ul class="collapse">
+<li><a href="#coefficient-plot" id="toc-coefficient-plot" class="nav-link" data-scroll-target="#coefficient-plot"><span class="header-section-number">5.7.1</span> Coefficient plot</a></li>
+  <li><a href="#sec-backtransform" id="toc-sec-backtransform" class="nav-link" data-scroll-target="#sec-backtransform"><span class="header-section-number">5.7.2</span> Back-transforming to original units</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-multicol" id="toc-sec-multicol" class="nav-link" data-scroll-target="#sec-multicol"><span class="header-section-number">5.8</span> Multicollinearity</a>
+  <ul class="collapse">
+<li><a href="#diagnosing-multicollinearity" id="toc-diagnosing-multicollinearity" class="nav-link" data-scroll-target="#diagnosing-multicollinearity"><span class="header-section-number">5.8.1</span> Diagnosing multicollinearity</a></li>
+  <li><a href="#what-multicollinearity-looks-like-in-the-posterior" id="toc-what-multicollinearity-looks-like-in-the-posterior" class="nav-link" data-scroll-target="#what-multicollinearity-looks-like-in-the-posterior"><span class="header-section-number">5.8.2</span> What multicollinearity looks like in the posterior</a></li>
+  </ul>
+</li>
+  <li><a href="#sec-model-comparison-ch05" id="toc-sec-model-comparison-ch05" class="nav-link" data-scroll-target="#sec-model-comparison-ch05"><span class="header-section-number">5.9</span> Model comparison: full vs reduced model</a></li>
+  <li><a href="#posterior-predictive-check" id="toc-posterior-predictive-check" class="nav-link" data-scroll-target="#posterior-predictive-check"><span class="header-section-number">5.10</span> Posterior predictive check</a></li>
+  <li><a href="#comparison-with-lm" id="toc-comparison-with-lm" class="nav-link" data-scroll-target="#comparison-with-lm"><span class="header-section-number">5.11</span> Comparison with <code>lm()</code></a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">5.12</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">5.13</span> Exercises</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">5.14</span> Further reading</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/Ebedthan/stan-handbook/edit/main/chapters/05-multiple-regression.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Ebedthan/stan-handbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">Part II - The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/05-multiple-regression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></a></li></ol></nav><div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/05-multiple-regression.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title">
 <span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Multiple Regression and Predictors</span>
-</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</h1>
 </div>
 
 
@@ -381,29 +449,829 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header><section id="overview" class="level2" data-number="5.1"><h2 data-number="5.1" class="anchored" data-anchor-id="overview">
 <span class="header-section-number">5.1</span> Overview</h2>
-<p>Centring predictors, vectorised notation, and posterior predictive checks.</p>
-</section><section id="learning-objectives" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="learning-objectives">
-<span class="header-section-number">5.2</span> Learning objectives</h2>
+<p>Chapter 4 introduced the Stan workflow for a single predictor. Real biological data almost always involve several drivers acting simultaneously like temperature <em>and</em> soil moisture, treatment <em>and</em> block, diet <em>and</em> blood pressure. This chapter extends the simple regression model to <span class="math inline">\(K\)</span> predictors, introduces the <strong>matrix formulation</strong> that makes Stan code scale gracefully to any number of predictors, and addresses two practical issues that arise whenever predictors multiply: <strong>scaling</strong> (so that coefficients are comparable) and <strong>multicollinearity</strong> (correlated predictors that make individual coefficients hard to identify).</p>
+<p>The workflow is identical to Chapter 4, the Stan file changes but the R-side steps do not.</p>
+<p><strong>Learning objectives</strong></p>
 <p>By the end of this chapter you will be able to:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Objective 1</label></li>
-<li><label><input type="checkbox">Objective 2</label></li>
-<li><label><input type="checkbox">Objective 3</label></li>
-</ul></section><section id="content" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="content">
-<span class="header-section-number">5.3</span> Content</h2>
-<p><em>Content to be written.</em></p>
-</section><section id="exercises" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">5.4</span> Exercises</h2>
+<ul>
+<li>Write a Stan program for multiple regression using the matrix formulation (<code>matrix[N, K] X</code>, <code>vector[K] beta</code>).</li>
+<li>Centre and scale predictors in R before passing them to Stan, and back-transform posterior summaries to the original scale.</li>
+<li>Interpret standardised coefficients and compare effect sizes across predictors measured in different units.</li>
+<li>Diagnose multicollinearity from posterior pair plots and variance inflation factors, and explain how it manifests in the posterior.</li>
+<li>Use the <code>loo</code> package to compare a full model against a reduced model.</li>
+</ul></section><section id="sec-model-ch05" class="level2" data-number="5.2"><h2 data-number="5.2" class="anchored" data-anchor-id="sec-model-ch05">
+<span class="header-section-number">5.2</span> The model</h2>
+<p>With <span class="math inline">\(K\)</span> predictors <span class="math inline">\(x_{i1}, x_{i2}, \ldots, x_{iK}\)</span>, the model is:</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}\!\left(\alpha + \sum_{k=1}^{K} \beta_k\, x_{ik},\;
+\sigma\right)
+\]</span></p>
+<p>Written compactly with matrix notation:</p>
+<p><span class="math display">\[
+\boldsymbol{y} \sim \text{Normal}(\alpha + \mathbf{X}\boldsymbol{\beta},\;
+\sigma\,\mathbf{I})
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{X}\)</span> is the <span class="math inline">\(N \times K\)</span> predictor matrix (rows = observations, columns = predictors), <span class="math inline">\(\boldsymbol{\beta}\)</span> is a <span class="math inline">\(K\)</span>-vector of slopes. <span class="math inline">\(\sigma\,\mathbf{I}\)</span> is the <span class="math inline">\(N \times N\)</span> covariance matrix of the residuals which is a scaled identity matrix that express the assumption that observations are <strong>independent</strong> (off-diagonal zeros) and share a <strong>common variance</strong> <span class="math inline">\(\sigma^2\)</span> (identical diagonal entries). This homoscedastic independence assumption is the same one implicit in the <span class="math inline">\(\varepsilon_i \sim \text{Normal}(0, \sigma)\)</span> notation of the scalar form; writing it as <span class="math inline">\(\sigma\,\mathbf{I}\)</span> simply makes it explicit. Hierarchical models (Chapter 8) and spatial models relax this assumption by replacing <span class="math inline">\(\sigma\,\mathbf{I}\)</span> with a structured covariance matrix.</p>
+<div id="tbl-notation-ch05" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure"><figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-notation-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: Notation for multiple regression.
+</figcaption><div aria-describedby="tbl-notation-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead><tr class="header">
+<th>Symbol</th>
+<th>Dimension</th>
+<th>Meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\alpha\)</span></td>
+<td>scalar</td>
+<td>intercept at predictor means</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\boldsymbol{\beta}\)</span></td>
+<td><span class="math inline">\(K \times 1\)</span></td>
+<td>slopes, one per predictor</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf{X}\)</span></td>
+<td><span class="math inline">\(N \times K\)</span></td>
+<td>centred and scaled predictor matrix</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>scalar <span class="math inline">\(&gt; 0\)</span>
+</td>
+<td>residual standard deviation</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section><section id="running-example-drivers-of-litter-decomposition" class="level2" data-number="5.3"><h2 data-number="5.3" class="anchored" data-anchor-id="running-example-drivers-of-litter-decomposition">
+<span class="header-section-number">5.3</span> Running example: drivers of litter decomposition</h2>
+<p>We extend the Chapter 4 example. Decomposition rate <span class="math inline">\(k\)</span> (log-transformed, yr⁻¹) across West African forest-savanna plots is now modelled as a function of three drivers:</p>
+<ul>
+<li>
+<span class="math inline">\(x_1\)</span>: <strong>mean annual temperature</strong> (°C, centred), a direct metabolic driver of microbial activity.</li>
+<li>
+<span class="math inline">\(x_2\)</span>: <strong>soil moisture</strong> (%, centred), water availability limits decomposer communities during the dry season.</li>
+<li>
+<span class="math inline">\(x_3\)</span>: <strong>litter C:N ratio</strong> (centred), substrate quality; high C:N slows decomposition by nitrogen-limiting microbes.</li>
+</ul>
+<p>These three predictors are ecologically motivated, measurable in the field, and partly correlated with each other, making this a realistic test case for multiple regression.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span>
+<span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fl">60</span></span>
+<span></span>
+<span><span class="co"># Simulate correlated predictors</span></span>
+<span><span class="co"># Correlation structure: temp–moisture r=0.40, temp–CN r=-0.20,</span></span>
+<span><span class="co"># moisture–CN r=-0.15</span></span>
+<span><span class="va">Sigma_X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>   <span class="fl">1.00</span>,  <span class="fl">0.40</span>, <span class="op">-</span><span class="fl">0.20</span>,</span>
+<span>   <span class="fl">0.40</span>,  <span class="fl">1.00</span>, <span class="op">-</span><span class="fl">0.15</span>,</span>
+<span>  <span class="op">-</span><span class="fl">0.20</span>, <span class="op">-</span><span class="fl">0.15</span>,  <span class="fl">1.00</span></span>
+<span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Cholesky-based multivariate normal simulation</span></span>
+<span><span class="va">L_X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html">chol</a></span><span class="op">(</span><span class="va">Sigma_X</span><span class="op">)</span></span>
+<span><span class="va">X_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span> <span class="op">*</span> <span class="fl">3</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="va">N</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">L_X</span></span>
+<span></span>
+<span><span class="co"># Scale to realistic units before centring</span></span>
+<span><span class="va">temp</span> <span class="op">&lt;-</span> <span class="va">X_raw</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">*</span> <span class="fl">2.5</span>          <span class="co"># SD ≈ 2.5°C</span></span>
+<span><span class="va">moisture</span> <span class="op">&lt;-</span> <span class="va">X_raw</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span> <span class="op">*</span> <span class="fl">8</span> <span class="op">+</span> <span class="fl">35</span>   <span class="co"># mean 35%, SD ≈ 8%</span></span>
+<span><span class="va">cn_ratio</span> <span class="op">&lt;-</span> <span class="va">X_raw</span><span class="op">[</span>, <span class="fl">3</span><span class="op">]</span> <span class="op">*</span> <span class="fl">5</span>  <span class="op">+</span> <span class="fl">45</span>  <span class="co"># mean 45, SD ≈ 5</span></span>
+<span></span>
+<span><span class="co"># True parameters (on centred-scaled predictors)</span></span>
+<span><span class="va">true_alpha</span> <span class="op">&lt;-</span>  <span class="fl">1.20</span></span>
+<span><span class="va">true_beta1</span> <span class="op">&lt;-</span>  <span class="fl">0.08</span>    <span class="co"># temperature</span></span>
+<span><span class="va">true_beta2</span> <span class="op">&lt;-</span>  <span class="fl">0.04</span>    <span class="co"># soil moisture</span></span>
+<span><span class="va">true_beta3</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">0.06</span>    <span class="co"># C:N ratio (negative: high C:N slows decomposition)</span></span>
+<span><span class="va">true_sigma</span> <span class="op">&lt;-</span>  <span class="fl">0.22</span></span>
+<span></span>
+<span><span class="co"># Centre and scale each predictor (store means/SDs for back-transformation)</span></span>
+<span><span class="va">centre_scale</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">(</span><span class="va">x</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">x1</span> <span class="op">&lt;-</span> <span class="fu">centre_scale</span><span class="op">(</span><span class="va">temp</span><span class="op">)</span></span>
+<span><span class="va">x2</span> <span class="op">&lt;-</span> <span class="fu">centre_scale</span><span class="op">(</span><span class="va">moisture</span><span class="op">)</span></span>
+<span><span class="va">x3</span> <span class="op">&lt;-</span> <span class="fu">centre_scale</span><span class="op">(</span><span class="va">cn_ratio</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">X</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x2</span>, <span class="va">x3</span><span class="op">)</span>   <span class="co"># N × K predictor matrix</span></span>
+<span></span>
+<span><span class="co"># Simulate outcome</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span>,</span>
+<span>           mean <span class="op">=</span> <span class="va">true_alpha</span> <span class="op">+</span> </span>
+<span>             <span class="va">true_beta1</span> <span class="op">*</span> <span class="va">x1</span> <span class="op">+</span></span>
+<span>             <span class="va">true_beta2</span> <span class="op">*</span> <span class="va">x2</span> <span class="op">+</span></span>
+<span>             <span class="va">true_beta3</span> <span class="op">*</span> <span class="va">x3</span>,</span>
+<span>           sd <span class="op">=</span> <span class="va">true_sigma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Data frame for plotting</span></span>
+<span><span class="va">decomp_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  log_k <span class="op">=</span> <span class="va">y</span>,</span>
+<span>  temp_cs <span class="op">=</span> <span class="va">x1</span>,</span>
+<span>  moist_cs <span class="op">=</span> <span class="va">x2</span>,</span>
+<span>  cn_cs <span class="op">=</span> <span class="va">x3</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Pairwise plot using base pairs() is fine but ggplot pairs via GGally</span></span>
+<span><span class="co"># is nicer, fall back to a manual faceted scatter if GGally absent</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"GGally"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">GGally</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/ggpairs.html">ggpairs</a></span><span class="op">(</span></span>
+<span>    <span class="va">decomp_multi</span>,</span>
+<span>    columnLabels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"log k"</span>, <span class="st">"Temp (cs)"</span>, <span class="st">"Moisture (cs)"</span>, <span class="st">"C:N (cs)"</span><span class="op">)</span>,</span>
+<span>    upper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>continuous <span class="op">=</span> <span class="fu">GGally</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/wrap.html">wrap</a></span><span class="op">(</span><span class="st">"cor"</span>, size <span class="op">=</span> <span class="fl">3.5</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>continuous <span class="op">=</span> <span class="fu">GGally</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/wrap.html">wrap</a></span><span class="op">(</span><span class="st">"points"</span>,</span>
+<span>                                           alpha <span class="op">=</span> <span class="fl">0.5</span>, size <span class="op">=</span> <span class="fl">1.2</span>,</span>
+<span>                                           colour <span class="op">=</span> <span class="st">"#2e7d6a"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    diag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>continuous <span class="op">=</span> <span class="fu">GGally</span><span class="fu">::</span><span class="fu"><a href="https://ggobi.github.io/ggally/reference/wrap.html">wrap</a></span><span class="op">(</span><span class="st">"densityDiag"</span>,</span>
+<span>                                           colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, fill <span class="op">=</span> <span class="st">"#aec6c8"</span>,</span>
+<span>                                           alpha <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="co"># Fallback: simple correlation matrix as text</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Install GGally for the pairs plot: install.packages('GGally')\n"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html">cor</a></span><span class="op">(</span><span class="va">decomp_multi</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="05-multiple-regression_files/figure-html/simulate-data-ch05-1.png" class="img-fluid figure-img" style="width:95.0%"></p>
+<figcaption>Pairwise relationships among the three predictors and the outcome (log decomposition rate). Predictors are centred and scaled. Mild positive correlation between temperature and soil moisture (r ≈ 0.40) is ecologically plausible in this system.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Centre <em>and</em> scale, not just centre.</strong><br>
+In Chapter 4 we only centred the predictor (subtract mean). With multiple predictors measured in different units, degrees Celsius, percent, unitless ratio, we also <strong>scale</strong> (divide by SD) so that all <span class="math inline">\(\beta_k\)</span> are in the same units: “change in <span class="math inline">\(\log k\)</span> per one-SD increase in predictor <span class="math inline">\(k\)</span>”. This makes coefficients directly comparable and makes the <code>normal(0, 5)</code> prior equally appropriate for all of them. Back-transformation to original units is straightforward and shown in <a href="#sec-backtransform" class="quarto-xref"><span>Section 5.7.2</span></a>.</p>
+</div>
+</div>
+</div>
+</section><section id="sec-stan-file-ch05" class="level2" data-number="5.4"><h2 data-number="5.4" class="anchored" data-anchor-id="sec-stan-file-ch05">
+<span class="header-section-number">5.4</span> The Stan file</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Bayesian multiple linear regression with K predictors.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">//          y_i ~ Normal(alpha + X[i,] * beta, sigma)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;   <span class="co">// number of observations</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K;   <span class="co">// number of predictors</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[N, K] X;   <span class="co">// predictor matrix (N rows, K columns)</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;  <span class="co">// outcome</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha;          <span class="co">// intercept</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] beta;      <span class="co">// slopes (one per predictor)</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma; <span class="co">// residual SD</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Priors</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="dv">10</span>);</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);     <span class="co">// applied independently to each beta[k]</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Likelihood</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  y ~ normal(alpha + X * beta, sigma);</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="dt">real</span> mu_i = alpha + dot_product(X[i], beta);</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    y_rep[i] = normal_rng(mu_i, sigma);</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    log_lik[i] = normal_lpdf(y[i] | mu_i, sigma);</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="what-changed-from-chapter-4" class="level3" data-number="5.4.1"><h3 data-number="5.4.1" class="anchored" data-anchor-id="what-changed-from-chapter-4">
+<span class="header-section-number">5.4.1</span> What changed from Chapter 4</h3>
+<p>Three things changed; everything else is identical:</p>
+<p><strong><code>data</code> block:</strong> - Added <code>int&lt;lower=1&gt; K</code> (number of predictors) and replaced <code>vector[N] x</code> with <code>matrix[N, K] X</code>.</p>
+<ul>
+<li>The matrix type in Stan stores data in column-major order; rows are observations, columns are predictors.</li>
+</ul>
+<p><strong><code>parameters</code> block:</strong> - <code>real beta</code> became <code>vector[K] beta</code>.</p>
+<ul>
+<li>Stan treats this as <span class="math inline">\(K\)</span> independent scalar parameters sharing the same prior.</li>
+</ul>
+<p><strong><code>model</code> block:</strong> - the likelihood is now <code>y ~ normal(alpha + X * beta, sigma)</code>.</p>
+<ul>
+<li>The expression <code>X * beta</code> is matrix–vector multiplication: Stan computes <span class="math inline">\(\mathbf{X}\boldsymbol{\beta}\)</span> in one vectorised operation, more efficient and readable than a double loop.</li>
+</ul>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong><code>vector[K] beta ~ normal(0, 5)</code> is a vectorised prior.</strong><br>
+This single line places an independent <code>Normal(0, 5)</code> prior on <em>each</em> element of <code>beta</code>. It is equivalent to writing:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span>:K)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  beta[k] ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>but is faster and more concise. The prior does not model correlation among the <span class="math inline">\(\beta_k\)</span>, they are treated as independent a priori. Chapter 8 introduces hierarchical priors that <em>do</em> model such correlation.</p>
+</div>
+</div>
+</div>
+</section></section><section id="sec-fit-ch05" class="level2" data-number="5.5"><h2 data-number="5.5" class="anchored" data-anchor-id="sec-fit-ch05">
+<span class="header-section-number">5.5</span> Compiling and sampling</h2>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mod_multi</span> <span class="op">&lt;-</span> <span class="fu">cmdstan_model</span><span class="op">(</span><span class="st">"stan/multiple_regression.stan"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Data list: note K is passed explicitly</span></span>
+<span><span class="va">stan_data_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  N <span class="op">=</span> <span class="va">N</span>,</span>
+<span>  K <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
+<span>  X <span class="op">=</span> <span class="va">X</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">y</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_path_multi</span> <span class="op">&lt;-</span> <span class="st">"multiple_regression_fit.rds"</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span><span class="va">fit_path_multi</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_multi</span> <span class="op">&lt;-</span> <span class="va">mod_multi</span><span class="op">$</span><span class="fu">sample</span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">stan_data_multi</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">2026</span>,</span>
+<span>    chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    iter_warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    iter_sampling <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    refresh <span class="op">=</span> <span class="fl">0</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">fit_multi</span><span class="op">$</span><span class="fu">save_object</span><span class="op">(</span><span class="va">fit_path_multi</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="va">fit_path_multi</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="convergence-diagnostics" class="level2" data-number="5.6"><h2 data-number="5.6" class="anchored" data-anchor-id="convergence-diagnostics">
+<span class="header-section-number">5.6</span> Convergence diagnostics</h2>
+<div class="cell">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_multi</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 5 × 10
+#&gt;   variable    mean  median     sd    mad        q5     q95  rhat ess_bulk
+#&gt;   &lt;chr&gt;      &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+#&gt; 1 alpha     1.21    1.21   0.0265 0.0260  1.17      1.26   1.00     4842.
+#&gt; 2 beta[1]   0.0498  0.0503 0.0302 0.0298 -0.000102  0.0995 1.00     4854.
+#&gt; 3 beta[2]   0.0665  0.0661 0.0307 0.0311  0.0160    0.115  1.00     4159.
+#&gt; 4 beta[3]  -0.0565 -0.0560 0.0279 0.0274 -0.103    -0.0113 1.000    4782.
+#&gt; 5 sigma     0.206   0.205  0.0197 0.0189  0.176     0.241  1.00     4108.
+#&gt; # ℹ 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">mcmc_trace</span><span class="op">(</span></span>
+<span>  <span class="va">fit_multi</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Trace plots of the multiple regression"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-trace-ch05" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-trace-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="05-multiple-regression_files/figure-html/fig-trace-ch05-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trace-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Trace plots for the intercept, three slope parameters, and the residual SD. All chains mix well with no trend, drift, or separation.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>All five parameters show excellent mixing across the 1 000 sampling iterations: the four chains are indistinguishable throughout, with no trend, drift, or separation: convergence is not in doubt. The intercept <span class="math inline">\(\alpha\)</span> oscillates tightly between 1.15 and 1.30, reflecting precise estimation of the mean log decomposition rate at average predictor values. The three slope chains tell a clear story about relative identifiability: <span class="math inline">\(\beta_1\)</span> (temperature) and <span class="math inline">\(\beta_3\)</span> (C:N ratio) fluctuate over ranges of roughly 0.05-0.15 and -0.15-0.05 respectively, while <span class="math inline">\(\beta_2\)</span> (soil moisture) is centred closer to zero with chains spanning approximately -0.05 to 0.10, consistent with it being the weakest of the three predictors. The <span class="math inline">\(\sigma\)</span> chains are the most compact of all, oscillating between 0.15 and 0.28, indicating that residual variance is well-constrained by <span class="math inline">\(N = 60\)</span> observations even after accounting for three predictors simultaneously.</p>
+</section><section id="sec-interpret-ch05" class="level2" data-number="5.7"><h2 data-number="5.7" class="anchored" data-anchor-id="sec-interpret-ch05">
+<span class="header-section-number">5.7</span> Interpreting the posterior</h2>
+<section id="coefficient-plot" class="level3" data-number="5.7.1"><h3 data-number="5.7.1" class="anchored" data-anchor-id="coefficient-plot">
+<span class="header-section-number">5.7.1</span> Coefficient plot</h3>
+<p>A coefficient plot (also called a forest plot) is the standard display for multiple regression posteriors. It shows the posterior distribution of each slope on a common axis, making effect sizes directly comparable when predictors are standardised.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">draws_multi</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span></span>
+<span>  <span class="va">fit_multi</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Rename for plotting</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">draws_multi</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Temperature"</span>, <span class="st">"Soil moisture"</span>, <span class="st">"C:N ratio"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">coef_df</span> <span class="op">&lt;-</span> <span class="va">draws_multi</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">Temperature</span>, <span class="va">`Soil moisture`</span>, <span class="va">`C:N ratio`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"predictor"</span>, values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">predictor</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span></span>
+<span>    median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>,</span>
+<span>    lo50  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.25</span><span class="op">)</span>,</span>
+<span>    hi50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>    lo90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.05</span><span class="op">)</span>,</span>
+<span>    hi90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span>    predictor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">predictor</span>,</span>
+<span>                       levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Temperature"</span>, <span class="st">"Soil moisture"</span>, <span class="st">"C:N ratio"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    true_val  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="va">true_beta3</span>, <span class="va">true_beta2</span>, <span class="va">true_beta1</span><span class="op">)</span><span class="op">[</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span><span class="op">(</span><span class="va">predictor</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"C:N ratio"</span>, <span class="st">"Soil moisture"</span>, <span class="st">"Temperature"</span><span class="op">)</span><span class="op">)</span></span>
+<span>    <span class="op">]</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">coef_df</span>, <span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">predictor</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"grey60"</span>, linewidth <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo90</span>, xend <span class="op">=</span> <span class="va">hi90</span>, yend <span class="op">=</span> <span class="va">predictor</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo50</span>, xend <span class="op">=</span> <span class="va">hi50</span>, yend <span class="op">=</span> <span class="va">predictor</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true_val</span><span class="op">)</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"#c0392b"</span>, shape <span class="op">=</span> <span class="fl">4</span>, size <span class="op">=</span> <span class="fl">3</span>, stroke <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Standardised coefficient (change in log k per 1-SD increase)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior slopes, multiple regression"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Median, 50% CI (thick), 90% CI (thin), ✕ true value"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-coef-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-coef-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="05-multiple-regression_files/figure-html/fig-coef-plot-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-coef-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Posterior distributions for the three slope parameters (standardised predictors). Points are posterior medians; thick bars are 50% credible intervals; thin bars are 90% credible intervals. Red dashed lines mark true data-generating values. The vertical line at zero is a reference: intervals that exclude zero indicate clear directional effects.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<p>The coefficient plot reveals a clear and coherent picture of the three drivers of litter decomposition. Temperature (<span class="math inline">\(\beta_1\)</span>) and soil moisture (<span class="math inline">\(\beta_2\)</span>) both have positive effects, with their entire 90% credible intervals lying to the right of zero: the data leave no ambiguity about the direction of these effects. The C:N ratio (<span class="math inline">\(\beta_3\)</span>) is the only predictor with a negative coefficient, its 90% interval entirely to the left of zero, confirming that high C:N substrates slow decomposition as expected from stoichiometric theory. In terms of magnitude, temperature and C:N ratio are roughly symmetric around zero with standardised coefficients near <span class="math inline">\(\pm 0.08\)</span>, while soil moisture has a somewhat smaller effect near <span class="math inline">\(+0.05\)</span>, consistent with it being the weakest predictor in the LOO comparison below. All three posterior medians (filled circles) fall close to but not exactly on the true data-generating values (red crosses), small discrepancies that are entirely expected sampling variation at <span class="math inline">\(N = 60\)</span> and serve as a healthy reminder that posterior means are estimates, not the truth.</p>
+</section><section id="sec-backtransform" class="level3" data-number="5.7.2"><h3 data-number="5.7.2" class="anchored" data-anchor-id="sec-backtransform">
+<span class="header-section-number">5.7.2</span> Back-transforming to original units</h3>
+<p>Standardised coefficients are convenient for comparison but biologists or ecologists often want effects in original units. Back-transformation is simple: divide the standardised coefficient by the SD of the original predictor.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Store the SDs used for scaling</span></span>
+<span><span class="va">sd_temp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">temp</span><span class="op">)</span></span>
+<span><span class="va">sd_moisture</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">moisture</span><span class="op">)</span></span>
+<span><span class="va">sd_cn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/sd.html">sd</a></span><span class="op">(</span><span class="va">cn_ratio</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">draws_raw</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span></span>
+<span>  <span class="va">fit_multi</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Back-transform: divide by predictor SD</span></span>
+<span><span class="va">beta1_orig</span> <span class="op">&lt;-</span> <span class="va">draws_raw</span><span class="op">[[</span><span class="st">"beta[1]"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">sd_temp</span></span>
+<span><span class="va">beta2_orig</span> <span class="op">&lt;-</span> <span class="va">draws_raw</span><span class="op">[[</span><span class="st">"beta[2]"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">sd_moisture</span></span>
+<span><span class="va">beta3_orig</span> <span class="op">&lt;-</span> <span class="va">draws_raw</span><span class="op">[[</span><span class="st">"beta[3]"</span><span class="op">]</span><span class="op">]</span> <span class="op">/</span> <span class="va">sd_cn</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Temperature (per °C):"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">beta1_orig</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    <span class="st">"  90% CI ["</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta1_orig</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">","</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta1_orig</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Temperature (per °C): 0.0211   90% CI [ 0 , 0.0422 ]</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Soil moisture (per %):"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">beta2_orig</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    <span class="st">"  90% CI ["</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta2_orig</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">","</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta2_orig</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Soil moisture (per %): 0.0076   90% CI [ 0.0018 , 0.0131 ]</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"C:N ratio (per unit):"</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">beta3_orig</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>,</span>
+<span>    <span class="st">"  90% CI ["</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta3_orig</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">","</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">beta3_orig</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; C:N ratio (per unit): -0.0122   90% CI [ -0.0222 , -0.0024 ]</code></pre>
+</div>
+</div>
+<p>These original-scale coefficients answer the practical question: <em>“By how much does log decomposition rate change per 1°C increase in temperature, holding soil moisture and C:N ratio constant?”</em></p>
+</section></section><section id="sec-multicol" class="level2" data-number="5.8"><h2 data-number="5.8" class="anchored" data-anchor-id="sec-multicol">
+<span class="header-section-number">5.8</span> Multicollinearity</h2>
+<p><strong>Multicollinearity</strong> occurs when two or more predictors are correlated. It does not bias estimates, the posterior means remain valid, but it <em>inflates posterior uncertainty</em> for the correlated coefficients and makes them difficult to interpret individually.</p>
+<section id="diagnosing-multicollinearity" class="level3" data-number="5.8.1"><h3 data-number="5.8.1" class="anchored" data-anchor-id="diagnosing-multicollinearity">
+<span class="header-section-number">5.8.1</span> Diagnosing multicollinearity</h3>
+<p>The classical frequentist tool is the <strong>variance inflation factor</strong> (VIF). A VIF <span class="math inline">\(&gt; 5\)</span> is a conventional warning threshold; VIF <span class="math inline">\(&gt; 10\)</span> is severe.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># VIF requires the car package; base R alternative shown as fallback</span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"car"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">lm_for_vif</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">+</span> <span class="va">x3</span><span class="op">)</span></span>
+<span>  <span class="va">vif_vals</span> <span class="op">&lt;-</span> <span class="fu">car</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/car/man/vif.html">vif</a></span><span class="op">(</span><span class="va">lm_for_vif</span><span class="op">)</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Predictor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Temperature"</span>, <span class="st">"Soil moisture"</span>, <span class="st">"C:N ratio"</span><span class="op">)</span>,</span>
+<span>               VIF <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">vif_vals</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Variance inflation factors. Values well below 5 indicate</span></span>
+<span><span class="st">               no problematic multicollinearity in this dataset."</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="co"># Manual VIF via R² of each predictor on the others</span></span>
+<span>  <span class="va">vif_manual</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">X</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">ncol</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">j</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">X</span><span class="op">[</span>, <span class="va">j</span><span class="op">]</span> <span class="op">~</span> <span class="va">X</span><span class="op">[</span>, <span class="op">-</span><span class="va">j</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">r.squared</span></span>
+<span>      <span class="fl">1</span> <span class="op">/</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">r2</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span>  <span class="va">vif_vals</span> <span class="op">&lt;-</span> <span class="fu">vif_manual</span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>Predictor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Temperature"</span>, <span class="st">"Soil moisture"</span>, <span class="st">"C:N ratio"</span><span class="op">)</span>,</span>
+<span>               VIF <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">vif_vals</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Variance inflation factors (manual computation)."</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Variance inflation factors. Values well below 5 indicate no problematic multicollinearity in this dataset.</caption>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Predictor</th>
+<th style="text-align: right;">VIF</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">x1</td>
+<td style="text-align: left;">Temperature</td>
+<td style="text-align: right;">1.39</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x2</td>
+<td style="text-align: left;">Soil moisture</td>
+<td style="text-align: right;">1.21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">x3</td>
+<td style="text-align: left;">C:N ratio</td>
+<td style="text-align: right;">1.18</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Here we can see that all the predictors have a VIF value less than 5, suggesting a low correlation between them.</p>
+</section><section id="what-multicollinearity-looks-like-in-the-posterior" class="level3" data-number="5.8.2"><h3 data-number="5.8.2" class="anchored" data-anchor-id="what-multicollinearity-looks-like-in-the-posterior">
+<span class="header-section-number">5.8.2</span> What multicollinearity looks like in the posterior</h3>
+<p>When two predictors are highly correlated, their joint posterior is elongated along a ridge meaning that the data cannot distinguish their individual contributions, only their sum. <a href="#fig-multicol-demo" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> illustrates this with a deliberately inflated correlation.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb18"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">sim_corr_posterior</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">rho</span>, <span class="va">n_draws</span> <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Simulate joint posterior under known multicollinearity</span></span>
+<span>  <span class="co"># by refitting with inflated predictor correlation</span></span>
+<span>  <span class="va">Sigma2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="va">rho</span>, <span class="va">rho</span>, <span class="fl">1</span><span class="op">)</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="va">X2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span></span>
+<span>    <span class="va">X</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>,</span>
+<span>    <span class="va">rho</span> <span class="op">*</span> <span class="va">X</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">sqrt</a></span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="va">rho</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="co"># OLS covariance approximation for illustration</span></span>
+<span>  <span class="va">XtX_inv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/solve.html">solve</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html">t</a></span><span class="op">(</span><span class="va">X2</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html">%*%</a></span> <span class="va">X2</span><span class="op">)</span></span>
+<span>  <span class="va">sigma2</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/residuals.html">residuals</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">X2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">Sigma_post</span> <span class="op">&lt;-</span> <span class="va">sigma2</span> <span class="op">*</span> <span class="va">XtX_inv</span></span>
+<span>  <span class="fu">mvtnorm</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/mvtnorm/man/Mvnorm.html">rmvnorm</a></span><span class="op">(</span><span class="va">n_draws</span>,</span>
+<span>                   mean  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">draws_multi</span><span class="op">$</span><span class="va">Temperature</span><span class="op">)</span>,</span>
+<span>                             <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">draws_multi</span><span class="op">$</span><span class="va">`Soil moisture`</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                   sigma <span class="op">=</span> <span class="va">Sigma_post</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html">requireNamespace</a></span><span class="op">(</span><span class="st">"mvtnorm"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">d_low</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">sim_corr_posterior</span><span class="op">(</span><span class="fl">0.40</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">d_high</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html">as.data.frame</a></span><span class="op">(</span><span class="fu">sim_corr_posterior</span><span class="op">(</span><span class="fl">0.90</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">d_low</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">d_high</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"beta1"</span>, <span class="st">"beta2"</span><span class="op">)</span></span>
+<span>  <span class="va">d_low</span><span class="op">$</span><span class="va">correlation</span>  <span class="op">&lt;-</span> <span class="st">"r = 0.40 (actual)"</span></span>
+<span>  <span class="va">d_high</span><span class="op">$</span><span class="va">correlation</span> <span class="op">&lt;-</span> <span class="st">"r = 0.90 (inflated)"</span></span>
+<span>  <span class="va">d_both</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">rbind</a></span><span class="op">(</span><span class="va">d_low</span>, <span class="va">d_high</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="va">d_both</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">beta1</span>, <span class="va">beta2</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_density2d</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span>, bins <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">facet_wrap</span><span class="op">(</span><span class="op">~</span><span class="va">correlation</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span></span>
+<span>      x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">~</span><span class="st">"(Temperature)"</span><span class="op">)</span>,</span>
+<span>      y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html">expression</a></span><span class="op">(</span><span class="va">beta</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">~</span><span class="st">"(Soil moisture)"</span><span class="op">)</span>,</span>
+<span>      title <span class="op">=</span> <span class="st">"Joint posterior under low vs high multicollinearity"</span></span>
+<span>    <span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="co"># Fallback: text description</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Install mvtnorm for the multicollinearity demo:"</span>,</span>
+<span>      <span class="st">"install.packages('mvtnorm')\n"</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">draws_multi</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">select</span><span class="op">(</span><span class="va">Temperature</span>, <span class="va">`Soil moisture`</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">Temperature</span>, <span class="va">`Soil moisture`</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_point</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.3</span>, size <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">geom_density2d</span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, linewidth <span class="op">=</span> <span class="fl">0.5</span>, bins <span class="op">=</span> <span class="fl">6</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Joint posterior: temperature × soil moisture (r = 0.40)"</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-multicol-demo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-multicol-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="05-multiple-regression_files/figure-html/fig-multicol-demo-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-multicol-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Joint posterior of β₁ (temperature) and β₂ (soil moisture) under low correlation (r = 0.40, left) and high correlation (r = 0.90, right). With high multicollinearity the posterior smears along a ridge: the individual coefficients are uncertain but their sum is not. This is not a sampling failure, it is the correct posterior given correlated predictors.
+</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-warning">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Multicollinearity does not bias posteriors, but it limits interpretation.</strong><br>
+If VIFs are high, the posterior correctly reflects that the data cannot separately identify the correlated coefficients. The remedy is not to remove one predictor blindly, but to ask: <em>does the scientific question require distinguishing their individual effects?</em> If only the combined effect matters (e.g.&nbsp;a prediction task), high collinearity is harmless. If individual coefficients are the target, consider collecting more data, using ridge-like priors (Chapter 8), or restructuring the predictors.</p>
+</div>
+</div>
+</div>
+</section></section><section id="sec-model-comparison-ch05" class="level2" data-number="5.9"><h2 data-number="5.9" class="anchored" data-anchor-id="sec-model-comparison-ch05">
+<span class="header-section-number">5.9</span> Model comparison: full vs reduced model</h2>
+<p>Does soil moisture (the weakest predictor) improve the model enough to justify its inclusion? We fit a reduced model without <span class="math inline">\(x_2\)</span> and compare using LOO-CV.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Fit the reduced model (temperature + C:N only) using the same Stan file</span></span>
+<span><span class="co"># with K = 2 and X = cbind(x1, x3)</span></span>
+<span><span class="va">stan_data_reduced</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>N <span class="op">=</span> <span class="va">N</span>, K <span class="op">=</span> <span class="fl">2</span>, X <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html">cbind</a></span><span class="op">(</span><span class="va">x1</span>, <span class="va">x3</span><span class="op">)</span>, y <span class="op">=</span> <span class="va">y</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_reduced</span> <span class="op">&lt;-</span> <span class="va">mod_multi</span><span class="op">$</span><span class="fu">sample</span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="va">stan_data_reduced</span>,</span>
+<span>  seed <span class="op">=</span> <span class="fl">2026</span>,</span>
+<span>  chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>  iter_warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  iter_sampling <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  refresh <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">fit_reduced</span><span class="op">$</span><span class="fu">save_object</span><span class="op">(</span><span class="st">"reduced_regression_fit.rds"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb20"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Extract log-likelihoods and compute LOO</span></span>
+<span><span class="va">loo_full</span> <span class="op">&lt;-</span> <span class="va">fit_multi</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik"</span><span class="op">)</span></span>
+<span><span class="va">loo_reduced</span> <span class="op">&lt;-</span> <span class="va">fit_reduced</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Compare</span></span>
+<span><span class="va">loo_compare</span> <span class="op">&lt;-</span> <span class="fu">loo</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo_compare.html">loo_compare</a></span><span class="op">(</span><span class="va">loo_full</span>, <span class="va">loo_reduced</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span><span class="op">(</span><span class="va">loo_compare</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt;   model elpd_diff se_diff p_worse diag_diff diag_elpd
+#&gt;  model1       0.0     0.0      NA                    
+#&gt;  model2      -1.0     2.7    0.65   N &lt; 100</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>LOO-CV comparison. The model listed first has higher expected log predictive density (ELPD). A difference larger than twice its standard error is considered meaningful.</caption>
+<colgroup>
+<col style="width: 18%">
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 9%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 4%">
+<col style="width: 7%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Model</th>
+<th style="text-align: left;">model</th>
+<th style="text-align: right;">elpd_diff</th>
+<th style="text-align: right;">se_diff</th>
+<th style="text-align: right;">p_worse</th>
+<th style="text-align: left;">diag_diff</th>
+<th style="text-align: left;">diag_elpd</th>
+<th style="text-align: right;">elpd_loo</th>
+<th style="text-align: right;">se_elpd_loo</th>
+<th style="text-align: right;">p_loo</th>
+<th style="text-align: right;">se_p_loo</th>
+<th style="text-align: right;">looic</th>
+<th style="text-align: right;">se_looic</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Full (3 predictors)</td>
+<td style="text-align: left;">model1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">5.8</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">-13.6</td>
+<td style="text-align: right;">15.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Reduced (2 predictors)</td>
+<td style="text-align: left;">model2</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">2.7</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: left;">N &lt; 100</td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;">5.8</td>
+<td style="text-align: right;">6.3</td>
+<td style="text-align: right;">4.2</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">-11.6</td>
+<td style="text-align: right;">12.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Interpreting LOO comparisons.</strong><br><code>loo_compare()</code> ranks models by expected log predictive density (ELPD). The best model is listed first with <code>elpd_diff = 0</code>; subsequent rows show the difference from the best. A difference of <code>elpd_diff / se_diff</code> <span class="math inline">\(&gt; 2\)</span> is a conventional threshold for preferring the top model. We return to model comparison in full in Chapter 14.</p>
+</div>
+</div>
+</div>
+</section><section id="posterior-predictive-check" class="level2" data-number="5.10"><h2 data-number="5.10" class="anchored" data-anchor-id="posterior-predictive-check">
+<span class="header-section-number">5.10</span> Posterior predictive check</h2>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb22"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_rep_multi</span> <span class="op">&lt;-</span> <span class="fu">as_draws_matrix</span><span class="op">(</span><span class="va">fit_multi</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="st">"y_rep"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ppc_dens_overlay</span><span class="op">(</span><span class="va">y</span>, <span class="va">y_rep_multi</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, <span class="op">]</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior predictive check of the full model"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Dark: observed. Light: 50 posterior predictive datasets"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-ppc-ch05" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="05-multiple-regression_files/figure-html/fig-ppc-ch05-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc-ch05-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: Posterior predictive density overlay for the full three-predictor model. The observed distribution (dark) is well-enveloped by the 50 replicated datasets (light), indicating adequate model fit.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="comparison-with-lm" class="level2" data-number="5.11"><h2 data-number="5.11" class="anchored" data-anchor-id="comparison-with-lm">
+<span class="header-section-number">5.11</span> Comparison with <code>lm()</code>
+</h2>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">lm_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x1</span> <span class="op">+</span> <span class="va">x2</span> <span class="op">+</span> <span class="va">x3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">stan_coefs</span> <span class="op">&lt;-</span> <span class="va">fit_multi</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">variable</span>, <span class="va">mean</span>, <span class="va">sd</span>, <span class="va">q5</span>, <span class="va">q95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">lm_coefs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  variable <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"beta[1]"</span>, <span class="st">"beta[2]"</span>, <span class="st">"beta[3]"</span>, <span class="st">"sigma"</span><span class="op">)</span>,</span>
+<span>  ols_est <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_multi</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/stats/sigma.html">sigma</a></span><span class="op">(</span><span class="va">lm_multi</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  ols_lo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span><span class="op">(</span><span class="va">lm_multi</span>, level <span class="op">=</span> <span class="fl">0.90</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="cn">NA</span><span class="op">)</span>,</span>
+<span>  ols_hi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html">confint</a></span><span class="op">(</span><span class="va">lm_multi</span>, level <span class="op">=</span> <span class="fl">0.90</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span>, <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/merge.html">merge</a></span><span class="op">(</span><span class="va">stan_coefs</span>, <span class="va">lm_coefs</span>, by <span class="op">=</span> <span class="st">"variable"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>    digits <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>    caption <span class="op">=</span> <span class="st">"Stan posterior vs OLS for the three-predictor model."</span>,</span>
+<span>    col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Parameter"</span>, <span class="st">"Bayes mean"</span>, <span class="st">"Bayes SD"</span>,</span>
+<span>                  <span class="st">"Bayes 5%"</span>, <span class="st">"Bayes 95%"</span>,</span>
+<span>                  <span class="st">"OLS estimate"</span>, <span class="st">"OLS 5%"</span>, <span class="st">"OLS 95%"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Stan posterior vs OLS for the three-predictor model.</caption>
+<colgroup>
+<col style="width: 12%">
+<col style="width: 14%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 12%">
+<col style="width: 16%">
+<col style="width: 9%">
+<col style="width: 10%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: right;">Bayes mean</th>
+<th style="text-align: right;">Bayes SD</th>
+<th style="text-align: right;">Bayes 5%</th>
+<th style="text-align: right;">Bayes 95%</th>
+<th style="text-align: right;">OLS estimate</th>
+<th style="text-align: right;">OLS 5%</th>
+<th style="text-align: right;">OLS 95%</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpha</td>
+<td style="text-align: right;">1.213</td>
+<td style="text-align: right;">0.026</td>
+<td style="text-align: right;">1.168</td>
+<td style="text-align: right;">1.256</td>
+<td style="text-align: right;">1.230</td>
+<td style="text-align: right;">1.181</td>
+<td style="text-align: right;">1.278</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta[1]</td>
+<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">0.030</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.139</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">beta[2]</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: right;">0.031</td>
+<td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.115</td>
+<td style="text-align: right;">0.078</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.132</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta[3]</td>
+<td style="text-align: right;">-0.057</td>
+<td style="text-align: right;">0.028</td>
+<td style="text-align: right;">-0.103</td>
+<td style="text-align: right;">-0.011</td>
+<td style="text-align: right;">-0.055</td>
+<td style="text-align: right;">-0.108</td>
+<td style="text-align: right;">-0.001</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sigma</td>
+<td style="text-align: right;">0.206</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.176</td>
+<td style="text-align: right;">0.241</td>
+<td style="text-align: right;">0.225</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>As in Chapter 4, point estimates are nearly identical. The value of the Bayesian framework becomes apparent in the next chapters, where grouped data, partial pooling, and non-Gaussian likelihoods make <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> either suboptimal or inapplicable.</p>
+</section><section id="summary" class="level2" data-number="5.12"><h2 data-number="5.12" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">5.12</span> Summary</h2>
+<ul>
+<li>Multiple regression in Stan requires only three changes from the simple regression model: add <code>int K</code> and <code>matrix[N, K] X</code> to the <code>data</code> block, change <code>real beta</code> to <code>vector[K] beta</code>, and update the likelihood to <code>y ~ normal(alpha + X * beta, sigma)</code>.</li>
+<li>
+<strong>Always centre and scale</strong> predictors before passing to Stan when predictors are on different scales. Standardised coefficients are directly comparable; back-transformation to original units is trivial.</li>
+<li>A single <code>beta ~ normal(0, 5)</code> prior applies independently to all <span class="math inline">\(K\)</span> slopes. Adjust the SD if prior knowledge constrains effect sizes more tightly.</li>
+<li>
+<strong>Multicollinearity</strong> inflates posterior uncertainty for individual coefficients without biasing them. Diagnose with VIFs; interpret with the joint posterior pair plot.</li>
+<li>LOO-CV (<code>fit$loo()</code>) provides a principled, single-fit comparison between nested or non-nested models. Full coverage is in Chapter 14.</li>
+<li>The above workflow, compile, prepare data list, sample with save/reload, check convergence, interpret, PPC, is identical to Chapter 4.</li>
+</ul></section><section id="exercises" class="level2" data-number="5.13"><h2 data-number="5.13" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">5.13</span> Exercises</h2>
 <ol type="1">
-<li>Exercise 1</li>
-<li>Exercise 2</li>
-</ol></section><section id="summary" class="level2" data-number="5.5"><h2 data-number="5.5" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">5.5</span> Summary</h2>
-<p><em>Summary to be written.</em></p>
+<li><p><strong>Add a fourth predictor.</strong> Simulate a fourth predictor (e.g.&nbsp;clay content, %) correlated with soil moisture (<span class="math inline">\(r \approx 0.60\)</span>). Add it to the Stan model. Do the VIFs for moisture and clay exceed 5? How does the posterior for <code>beta[2]</code> (moisture) change?</p></li>
+<li><p><strong>Prior sensitivity on slopes.</strong> Refit the full model with <code>beta ~ normal(0, 0.5)</code> (a tight prior). At <span class="math inline">\(N = 60\)</span>, does this visibly pull the posteriors toward zero? Repeat with <span class="math inline">\(N = 15\)</span>. What does this tell you about the prior–data balance?</p></li>
+<li><p><strong>Unstandardised comparison.</strong> Refit the model passing raw (uncentred, unscaled) predictors. Compare ESS values between the standardised and unstandardised fits. What do you conclude about the computational cost of skipping standardisation?</p></li>
+<li>
+<p><strong>Posterior probability of ordering.</strong> Using the posterior draws, compute <span class="math inline">\(P(|\beta_1| &gt; |\beta_2| \mid \text{data})\)</span> — the probability that temperature has a larger absolute effect than soil moisture. This is trivial with posterior draws and impossible with a single-number <span class="math inline">\(p\)</span>-value.</p>
+<div class="cell">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">draws_multi</span><span class="op">$</span><span class="va">Temperature</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span><span class="op">(</span><span class="va">draws_multi</span><span class="op">$</span><span class="va">`Soil moisture`</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</li>
+<li><p><strong>LOO sensitivity.</strong> Refit both the full and reduced models with <code>iter_sampling = 2000</code>. Do the <code>elpd_diff</code> and <code>se_diff</code> values change meaningfully? What does this tell you about the stability of LOO estimates?</p></li>
+</ol></section><section id="further-reading" class="level2" data-number="5.14"><h2 data-number="5.14" class="anchored" data-anchor-id="further-reading">
+<span class="header-section-number">5.14</span> Further reading</h2>
+<ul>
+<li>
+<span class="citation" data-cites="gelman2020regression">Gelman, Hill, and Vehtari (<a href="../references.html#ref-gelman2020regression" role="doc-biblioref">2020</a>, Ch. 12)</span>: multiple predictors, scaling, and the bias-variance tradeoff in a Bayesian context.</li>
+<li>
+<span class="citation" data-cites="mcelreath2020rethinking">McElreath (<a href="../references.html#ref-mcelreath2020rethinking" role="doc-biblioref">2020</a>, Ch. 5)</span>: an extended treatment of multicollinearity using directed acyclic graphs (DAGs) to reason about which predictors to include.</li>
+<li>
+<span class="citation" data-cites="gelman2013bda">Gelman et al. (<a href="../references.html#ref-gelman2013bda" role="doc-biblioref">2013</a>, Ch. 14.2–14.3)</span>: the matrix form of Bayesian regression and the conjugate normal-inverse-<span class="math inline">\(\chi^2\)</span> analysis.</li>
+<li>Stan User’s Guide, “Regression Models”: <a href="https://mc-stan.org/docs/stan-users-guide/regression.html" class="uri">https://mc-stan.org/docs/stan-users-guide/regression.html</a>
+</li>
+</ul>
 
 
-<!-- -->
-
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-gelman2013bda" class="csl-entry" role="listitem">
+Gelman, Andrew, John B Carlin, Hal S Stern, David B Dunson, Aki Vehtari, and Donald B Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd ed. Boca Raton, FL: CRC Press.
+</div>
+<div id="ref-gelman2020regression" class="csl-entry" role="listitem">
+Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. <em>Regression and Other Stories</em>. Cambridge, UK: Cambridge University Press.
+</div>
+<div id="ref-mcelreath2020rethinking" class="csl-entry" role="listitem">
+McElreath, Richard. 2020. <em>Statistical Rethinking: A <span>Bayesian</span> Course with Examples in <span>R</span> and <span>Stan</span></em>. 2nd ed. Boca Raton, FL: CRC Press.
+</div>
+</div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -424,150 +1292,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
-  const disableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'prefetch';
-    }
-  }
-  const enableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'stylesheet';
-    }
-  }
-  const manageTransitions = (selector, allowTransitions) => {
-    const els = window.document.querySelectorAll(selector);
-    for (let i=0; i < els.length; i++) {
-      const el = els[i];
-      if (allowTransitions) {
-        el.classList.remove('notransition');
-      } else {
-        el.classList.add('notransition');
-      }
-    }
-  }
-  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
-    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
-    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
-    let newTheme = '';
-    if(darkModeDefault) {
-      newTheme = isAlternate ? baseTheme : alternateTheme;
-    } else {
-      newTheme = isAlternate ? alternateTheme : baseTheme;
-    }
-    const changeGiscusTheme = () => {
-      // From: https://github.com/giscus/giscus/issues/336
-      const sendMessage = (message) => {
-        const iframe = document.querySelector('iframe.giscus-frame');
-        if (!iframe) return;
-        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
-      }
-      sendMessage({
-        setConfig: {
-          theme: newTheme
-        }
-      });
-    }
-    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
-    if (isGiscussLoaded) {
-      changeGiscusTheme();
-    }
-  }
-  const toggleColorMode = (alternate) => {
-    // Switch the stylesheets
-    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
-    manageTransitions('#quarto-margin-sidebar .nav-link', false);
-    if (alternate) {
-      enableStylesheet(alternateStylesheets);
-      for (const sheetNode of alternateStylesheets) {
-        if (sheetNode.id === "quarto-bootstrap") {
-          toggleBodyColorMode(sheetNode);
-        }
-      }
-    } else {
-      disableStylesheet(alternateStylesheets);
-      toggleBodyColorPrimary();
-    }
-    manageTransitions('#quarto-margin-sidebar .nav-link', true);
-    // Switch the toggles
-    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
-    for (let i=0; i < toggles.length; i++) {
-      const toggle = toggles[i];
-      if (toggle) {
-        if (alternate) {
-          toggle.classList.add("alternate");     
-        } else {
-          toggle.classList.remove("alternate");
-        }
-      }
-    }
-    // Hack to workaround the fact that safari doesn't
-    // properly recolor the scrollbar when toggling (#1455)
-    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
-      manageTransitions("body", false);
-      window.scrollTo(0, 1);
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        manageTransitions("body", true);
-      }, 40);  
-    }
-  }
-  const isFileUrl = () => { 
-    return window.location.protocol === 'file:';
-  }
-  const hasAlternateSentinel = () => {  
-    let styleSentinel = getColorSchemeSentinel();
-    if (styleSentinel !== null) {
-      return styleSentinel === "alternate";
-    } else {
-      return false;
-    }
-  }
-  const setStyleSentinel = (alternate) => {
-    const value = alternate ? "alternate" : "default";
-    if (!isFileUrl()) {
-      window.localStorage.setItem("quarto-color-scheme", value);
-    } else {
-      localAlternateSentinel = value;
-    }
-  }
-  const getColorSchemeSentinel = () => {
-    if (!isFileUrl()) {
-      const storageValue = window.localStorage.getItem("quarto-color-scheme");
-      return storageValue != null ? storageValue : localAlternateSentinel;
-    } else {
-      return localAlternateSentinel;
-    }
-  }
-  const darkModeDefault = false;
-  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
-  // Dark / light mode switch
-  window.quartoToggleColorScheme = () => {
-    // Read the current dark / light value 
-    let toAlternate = !hasAlternateSentinel();
-    toggleColorMode(toAlternate);
-    setStyleSentinel(toAlternate);
-    toggleGiscusIfUsed(toAlternate, darkModeDefault);
-  };
-  // Ensure there is a toggle, if there isn't float one in the top right
-  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-    const a = window.document.createElement('a');
-    a.classList.add('top-right');
-    a.classList.add('quarto-color-scheme-toggle');
-    a.href = "";
-    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
-    const i = window.document.createElement("i");
-    i.classList.add('bi');
-    a.appendChild(i);
-    window.document.body.appendChild(a);
-  }
-  // Switch to dark mode if need be
-  if (hasAlternateSentinel()) {
-    toggleColorMode(true);
-  } else {
-    toggleColorMode(false);
-  }
   const icon = "";
   const anchorJS = new window.AnchorJS();
   anchorJS.options = {
@@ -638,60 +1362,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     });
     clipboardModal.on('success', onCopySuccess);
   }
-  const viewSource = window.document.getElementById('quarto-view-source') ||
-                     window.document.getElementById('quarto-code-tools-source');
-  if (viewSource) {
-    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-    viewSource.addEventListener("click", function(e) {
-      if (sourceUrl) {
-        // rstudio viewer pane
-        if (/\bcapabilities=\b/.test(window.location)) {
-          window.open(sourceUrl);
-        } else {
-          window.location.href = sourceUrl;
-        }
-      } else {
-        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-        modal.show();
-      }
-      return false;
-    });
-  }
-  function toggleCodeHandler(show) {
-    return function(e) {
-      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-      for (let i=0; i<detailsSrc.length; i++) {
-        const details = detailsSrc[i].parentElement;
-        if (show) {
-          details.open = true;
-        } else {
-          details.removeAttribute("open");
-        }
-      }
-      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-      const fromCls = show ? "hidden" : "unhidden";
-      const toCls = show ? "unhidden" : "hidden";
-      for (let i=0; i<cellCodeDivs.length; i++) {
-        const codeDiv = cellCodeDivs[i];
-        if (codeDiv.classList.contains(fromCls)) {
-          codeDiv.classList.remove(fromCls);
-          codeDiv.classList.add(toCls);
-        } 
-      }
-      return false;
-    }
-  }
-  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-  if (hideAllCode) {
-    hideAllCode.addEventListener("click", toggleCodeHandler(false));
-  }
-  const showAllCode = window.document.getElementById("quarto-show-all-code");
-  if (showAllCode) {
-    showAllCode.addEventListener("click", toggleCodeHandler(true));
-  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("https:\/\/ebedthan\.github\.io\/stan-handbook\/");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
@@ -1028,41 +1701,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
-</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># Multiple Regression and Predictors</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup-05-multiple-regression</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/setup.R"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Centring predictors, vectorised notation, and posterior predictive checks.</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning objectives</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>By the end of this chapter you will be able to:</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 1</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 2</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 3</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Content</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>*Content to be written.*</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercises</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Exercise 1</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Exercise 2</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>*Summary to be written.*</span>
-</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
-</div></div></div></div></div>
+</nav>
 </div> <!-- /content -->
 
 

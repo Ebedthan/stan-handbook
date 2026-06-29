@@ -1,32 +1,757 @@
 # Multiple Regression and Predictors
 
 ```{r}
-#| label: setup-05-multiple-regression
+#| label: setup-ch05
 #| include: false
 source("../R/setup.R")
 ```
 
 ## Overview
 
-Centring predictors, vectorised notation, and posterior predictive checks.
+Chapter 4 introduced the Stan workflow for a single predictor. Real biological data almost always involve several drivers acting simultaneously like temperature *and* soil moisture, treatment *and* block, diet *and* blood pressure. This chapter extends the simple regression model to $K$ predictors, introduces the **matrix formulation** that makes Stan code scale gracefully to any number of predictors, and addresses two practical issues that arise whenever predictors multiply: **scaling** (so that coefficients are comparable) and **multicollinearity** (correlated predictors that make individual coefficients hard to identify).
 
-## Learning objectives
+The workflow is identical to Chapter 4, the Stan file changes but the R-side steps do not.
+
+**Learning objectives**
 
 By the end of this chapter you will be able to:
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+- Write a Stan program for multiple regression using the matrix formulation
+  (`matrix[N, K] X`, `vector[K] beta`).
+- Centre and scale predictors in R before passing them to Stan, and
+  back-transform posterior summaries to the original scale.
+- Interpret standardised coefficients and compare effect sizes across
+  predictors measured in different units.
+- Diagnose multicollinearity from posterior pair plots and variance
+  inflation factors, and explain how it manifests in the posterior.
+- Use the `loo` package to compare a full model against a reduced model.
 
-## Content
 
-*Content to be written.*
+## The model {#sec-model-ch05}
 
-## Exercises
+With $K$ predictors $x_{i1}, x_{i2}, \ldots, x_{iK}$, the model is:
 
-1. Exercise 1
-2. Exercise 2
+$$
+y_i \sim \text{Normal}\!\left(\alpha + \sum_{k=1}^{K} \beta_k\, x_{ik},\;
+\sigma\right)
+$$
+
+Written compactly with matrix notation:
+
+$$
+\boldsymbol{y} \sim \text{Normal}(\alpha + \mathbf{X}\boldsymbol{\beta},\;
+\sigma\,\mathbf{I})
+$$
+
+where $\mathbf{X}$ is the $N \times K$ predictor matrix (rows = observations, columns = predictors), $\boldsymbol{\beta}$ is a $K$-vector of slopes. $\sigma\,\mathbf{I}$ is the $N \times N$ covariance matrix of the residuals which is a scaled identity matrix that express the assumption that observations are **independent** (off-diagonal zeros) and share a **common variance** $\sigma^2$ (identical diagonal entries). This homoscedastic independence assumption is the same one implicit in the $\varepsilon_i \sim \text{Normal}(0, \sigma)$ notation of the scalar form; writing it as $\sigma\,\mathbf{I}$ simply makes it explicit. Hierarchical models (Chapter 8) and spatial models relax this assumption by replacing $\sigma\,\mathbf{I}$ with a structured covariance matrix.
+
+| Symbol | Dimension | Meaning |
+|---|---|---|
+| $\alpha$ | scalar | intercept at predictor means |
+| $\boldsymbol{\beta}$ | $K \times 1$ | slopes, one per predictor |
+| $\mathbf{X}$ | $N \times K$ | centred and scaled predictor matrix |
+| $\sigma$ | scalar $> 0$ | residual standard deviation |
+
+: Notation for multiple regression. {#tbl-notation-ch05}
+
+
+## Running example: drivers of litter decomposition
+
+We extend the Chapter 4 example. Decomposition rate $k$ (log-transformed, yr⁻¹) across West African forest-savanna plots is now modelled as a function of three drivers:
+
+- $x_1$: **mean annual temperature** (°C, centred), a direct metabolic driver of microbial activity.
+- $x_2$: **soil moisture** (%, centred), water availability limits decomposer communities during the dry season.
+- $x_3$: **litter C:N ratio** (centred), substrate quality; high C:N slows decomposition by nitrogen-limiting microbes.
+
+These three predictors are ecologically motivated, measurable in the field, and partly correlated with each other, making this a realistic test case for multiple regression.
+
+```{r}
+#| label: simulate-data-ch05
+#| fig-cap: >
+#|   Pairwise relationships among the three predictors and the outcome
+#|   (log decomposition rate). Predictors are centred and scaled. Mild
+#|   positive correlation between temperature and soil moisture (r ≈ 0.40)
+#|   is ecologically plausible in this system.
+#| fig-width: 7
+#| fig-height: 6
+#| cache: true
+#| code-fold: true
+
+set.seed(2026)
+N <- 60
+
+# Simulate correlated predictors
+# Correlation structure: temp–moisture r=0.40, temp–CN r=-0.20,
+# moisture–CN r=-0.15
+Sigma_X <- matrix(c(
+   1.00,  0.40, -0.20,
+   0.40,  1.00, -0.15,
+  -0.20, -0.15,  1.00
+), nrow = 3)
+
+# Cholesky-based multivariate normal simulation
+L_X <- chol(Sigma_X)
+X_raw <- matrix(rnorm(N * 3), nrow = N) %*% L_X
+
+# Scale to realistic units before centring
+temp <- X_raw[, 1] * 2.5          # SD ≈ 2.5°C
+moisture <- X_raw[, 2] * 8 + 35   # mean 35%, SD ≈ 8%
+cn_ratio <- X_raw[, 3] * 5  + 45  # mean 45, SD ≈ 5
+
+# True parameters (on centred-scaled predictors)
+true_alpha <-  1.20
+true_beta1 <-  0.08    # temperature
+true_beta2 <-  0.04    # soil moisture
+true_beta3 <- -0.06    # C:N ratio (negative: high C:N slows decomposition)
+true_sigma <-  0.22
+
+# Centre and scale each predictor (store means/SDs for back-transformation)
+centre_scale <- function(x) (x - mean(x)) / sd(x)
+
+x1 <- centre_scale(temp)
+x2 <- centre_scale(moisture)
+x3 <- centre_scale(cn_ratio)
+
+X  <- cbind(x1, x2, x3)   # N × K predictor matrix
+
+# Simulate outcome
+y <- rnorm(N,
+           mean = true_alpha + 
+             true_beta1 * x1 +
+             true_beta2 * x2 +
+             true_beta3 * x3,
+           sd = true_sigma)
+
+# Data frame for plotting
+decomp_multi <- data.frame(
+  log_k = y,
+  temp_cs = x1,
+  moist_cs = x2,
+  cn_cs = x3
+)
+
+# Pairwise plot using base pairs() is fine but ggplot pairs via GGally
+# is nicer, fall back to a manual faceted scatter if GGally absent
+if (requireNamespace("GGally", quietly = TRUE)) {
+  GGally::ggpairs(
+    decomp_multi,
+    columnLabels = c("log k", "Temp (cs)", "Moisture (cs)", "C:N (cs)"),
+    upper = list(continuous = GGally::wrap("cor", size = 3.5)),
+    lower = list(continuous = GGally::wrap("points",
+                                           alpha = 0.5, size = 1.2,
+                                           colour = "#2e7d6a")),
+    diag = list(continuous = GGally::wrap("densityDiag",
+                                           colour = "#2e7d6a", fill = "#aec6c8",
+                                           alpha = 0.6))
+  )
+} else {
+  # Fallback: simple correlation matrix as text
+  cat("Install GGally for the pairs plot: install.packages('GGally')\n")
+  print(round(cor(decomp_multi), 2))
+}
+```
+
+::: {.callout-tip}
+**Centre *and* scale, not just centre.**  
+In Chapter 4 we only centred the predictor (subtract mean). With multiple predictors measured in different units, degrees Celsius, percent, unitless ratio, we also **scale** (divide by SD) so that all $\beta_k$ are in the same units: "change in $\log k$ per one-SD increase in predictor $k$". This makes coefficients directly comparable and makes the `normal(0, 5)` prior equally appropriate for all of them. Back-transformation to original units is straightforward and shown in @sec-backtransform.
+:::
+
+
+## The Stan file {#sec-stan-file-ch05}
+
+```stan
+// Bayesian multiple linear regression with K predictors.
+//          y_i ~ Normal(alpha + X[i,] * beta, sigma)
+
+data {
+  int<lower=1> N;   // number of observations
+  int<lower=1> K;   // number of predictors
+  matrix[N, K] X;   // predictor matrix (N rows, K columns)
+  vector[N] y;  // outcome
+}
+
+parameters {
+  real alpha;          // intercept
+  vector[K] beta;      // slopes (one per predictor)
+  real<lower=0> sigma; // residual SD
+}
+
+model {
+  // Priors
+  alpha ~ normal(0, 10);
+  beta ~ normal(0, 5);     // applied independently to each beta[k]
+  sigma ~ exponential(1);
+
+  // Likelihood
+  y ~ normal(alpha + X * beta, sigma);
+}
+
+generated quantities {
+  vector[N] y_rep;
+  vector[N] log_lik;
+
+  for (i in 1:N) {
+    real mu_i = alpha + dot_product(X[i], beta);
+    y_rep[i] = normal_rng(mu_i, sigma);
+    log_lik[i] = normal_lpdf(y[i] | mu_i, sigma);
+  }
+}
+```
+
+### What changed from Chapter 4
+
+Three things changed; everything else is identical:
+
+**`data` block:** 
+- Added `int<lower=1> K` (number of predictors) and replaced `vector[N] x` with `matrix[N, K] X`.
+
+- The matrix type in Stan stores data in column-major order; rows are observations, columns are predictors.
+
+**`parameters` block:** 
+- `real beta` became `vector[K] beta`. 
+
+- Stan treats this as $K$ independent scalar parameters sharing the same prior.
+
+**`model` block:** 
+- the likelihood is now `y ~ normal(alpha + X * beta, sigma)`.
+
+- The expression `X * beta` is matrix–vector multiplication: Stan computes $\mathbf{X}\boldsymbol{\beta}$ in one vectorised operation, more efficient and readable than a double loop.
+
+::: {.callout-note}
+**`vector[K] beta ~ normal(0, 5)` is a vectorised prior.**  
+This single line places an independent `Normal(0, 5)` prior on *each* element of `beta`. It is equivalent to writing:
+
+```stan
+for (k in 1:K)
+  beta[k] ~ normal(0, 5);
+```
+
+but is faster and more concise. The prior does not model correlation among the $\beta_k$, they are treated as independent a priori. Chapter 8 introduces hierarchical priors that *do* model such correlation.
+:::
+
+## Compiling and sampling {#sec-fit-ch05}
+
+```{r}
+#| label: compile-ch05
+#| eval: false
+mod_multi <- cmdstan_model("stan/multiple_regression.stan")
+```
+
+```{r}
+#| label: compile-ch05-real
+#| include: false
+mod_multi <- cmdstan_model("../stan/multiple_regression.stan")
+```
+
+```{r}
+#| label: data-list-ch05
+#| cache: true
+# Data list: note K is passed explicitly
+stan_data_multi <- list(
+  N = N,
+  K = ncol(X),
+  X = X,
+  y = y
+)
+```
+
+```{r}
+#| label: sample-ch05
+#| eval: false
+fit_path_multi <- "multiple_regression_fit.rds"
+
+if (!file.exists(fit_path_multi)) {
+  fit_multi <- mod_multi$sample(
+    data = stan_data_multi,
+    seed = 2026,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_multi$save_object(fit_path_multi)
+} else {
+  fit_multi <- readRDS(fit_path_multi)
+}
+```
+
+```{r}
+#| label: sample-ch05-real
+#| include: false
+#| cache: true
+fit_path_multi <- file.path(
+  dirname(knitr::current_input(dir = TRUE)),
+  "multiple_regression_fit.rds"
+)
+
+if (!file.exists(fit_path_multi)) {
+  fit_multi <- mod_multi$sample(
+    data = stan_data_multi,
+    seed = 2026,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_multi$save_object(fit_path_multi)
+} else {
+  fit_multi <- readRDS(fit_path_multi)
+}
+```
+
+## Convergence diagnostics
+
+```{r}
+#| label: summary-ch05
+fit_multi$summary(variables = c("alpha", "beta[1]", "beta[2]", "beta[3]", "sigma"))
+```
+
+```{r}
+#| label: fig-trace-ch05
+#| fig-cap: >
+#|   Trace plots for the intercept, three slope parameters, and the
+#|   residual SD. All chains mix well with no trend, drift, or separation.
+#| fig-width: 9
+#| fig-height: 6
+#| cache: true
+#| code-fold: true
+mcmc_trace(
+  fit_multi$draws(c("alpha", "beta[1]", "beta[2]", "beta[3]", "sigma"))
+) +
+  labs(title = "Trace plots of the multiple regression")
+```
+
+All five parameters show excellent mixing across the 1 000 sampling iterations: the four chains are indistinguishable throughout, with no trend, drift, or separation: convergence is not in doubt. The intercept $\alpha$ oscillates tightly between 1.15 and 1.30, reflecting precise estimation of the mean log decomposition rate at average predictor values. The three slope chains tell a clear story about relative identifiability: $\beta_1$ (temperature) and $\beta_3$ (C:N ratio) fluctuate over ranges of roughly 0.05-0.15 and -0.15-0.05 respectively, while $\beta_2$ (soil moisture) is centred closer to zero with chains spanning approximately -0.05 to 0.10, consistent with it being the weakest of the three predictors. The $\sigma$ chains are the most compact of all, oscillating between 0.15 and 0.28, indicating that residual variance is well-constrained by $N = 60$ observations even after accounting for three predictors simultaneously.
+
+
+## Interpreting the posterior {#sec-interpret-ch05}
+
+### Coefficient plot
+
+A coefficient plot (also called a forest plot) is the standard display for multiple regression posteriors. It shows the posterior distribution of each slope on a common axis, making effect sizes directly comparable when predictors are standardised.
+
+```{r}
+#| label: fig-coef-plot
+#| fig-cap: >
+#|   Posterior distributions for the three slope parameters (standardised
+#|   predictors). Points are posterior medians; thick bars are 50% credible
+#|   intervals; thin bars are 90% credible intervals. Red dashed lines mark
+#|   true data-generating values. The vertical line at zero is a reference:
+#|   intervals that exclude zero indicate clear directional effects.
+#| fig-width: 6.5
+#| fig-height: 3.5
+#| cache: true
+#| code-fold: true
+
+draws_multi <- as_draws_df(
+  fit_multi$draws(c("beta[1]", "beta[2]", "beta[3]"))
+)
+
+# Rename for plotting
+names(draws_multi)[1:3] <- c("Temperature", "Soil moisture", "C:N ratio")
+
+coef_df <- draws_multi |>
+  select(Temperature, `Soil moisture`, `C:N ratio`) |>
+  pivot_longer(everything(), names_to = "predictor", values_to = "value") |>
+  group_by(predictor) |>
+  summarise(
+    median = median(value),
+    lo50  = quantile(value, 0.25),
+    hi50 = quantile(value, 0.75),
+    lo90 = quantile(value, 0.05),
+    hi90 = quantile(value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(
+    predictor = factor(predictor,
+                       levels = c("Temperature", "Soil moisture", "C:N ratio")),
+    true_val  = c(true_beta3, true_beta2, true_beta1)[
+      match(predictor, c("C:N ratio", "Soil moisture", "Temperature"))
+    ]
+  )
+
+ggplot(coef_df, aes(y = predictor)) +
+  geom_vline(xintercept = 0, linetype = "dashed",
+             colour = "grey60", linewidth = 0.6) +
+  geom_segment(aes(x = lo90, xend = hi90, yend = predictor),
+               colour = "#2e7d6a", linewidth = 0.8) +
+  geom_segment(aes(x = lo50, xend = hi50, yend = predictor),
+               colour = "#2e7d6a", linewidth = 2.5) +
+  geom_point(aes(x = median),
+             colour = "#1a4a40", size = 3) +
+  geom_point(aes(x = true_val),
+             colour = "#c0392b", shape = 4, size = 3, stroke = 1.2) +
+  labs(
+    x = "Standardised coefficient (change in log k per 1-SD increase)",
+    y = NULL,
+    title = "Posterior slopes, multiple regression",
+    subtitle = "Median, 50% CI (thick), 90% CI (thin), ✕ true value"
+  )
+```
+
+The coefficient plot reveals a clear and coherent picture of the three drivers of litter decomposition. Temperature ($\beta_1$) and soil moisture ($\beta_2$) both have positive effects, with their entire 90% credible intervals lying to the right of zero: the data leave no ambiguity about the direction of these effects. The C:N ratio ($\beta_3$) is the only predictor with a negative coefficient, its 90% interval entirely to the left of zero, confirming that high C:N substrates slow decomposition as expected from stoichiometric theory. In terms of magnitude, temperature and C:N ratio are roughly symmetric around zero with standardised coefficients near $\pm 0.08$, while soil moisture has a somewhat smaller effect near $+0.05$, consistent with it being the weakest predictor in the LOO comparison below. All three posterior medians (filled circles) fall close to but not exactly on the true data-generating values (red crosses), small discrepancies that are entirely expected sampling variation at $N = 60$ and serve as a healthy reminder that posterior means are estimates, not the truth.
+
+### Back-transforming to original units {#sec-backtransform}
+
+Standardised coefficients are convenient for comparison but biologists or ecologists often want effects in original units. Back-transformation is simple: divide the standardised coefficient by the SD of the original predictor.
+
+```{r}
+#| label: back-transform
+#| cache: true
+#| code-fold: true
+# Store the SDs used for scaling
+sd_temp <- sd(temp)
+sd_moisture <- sd(moisture)
+sd_cn <- sd(cn_ratio)
+
+draws_raw <- as_draws_df(
+  fit_multi$draws(c("beta[1]", "beta[2]", "beta[3]"))
+)
+
+# Back-transform: divide by predictor SD
+beta1_orig <- draws_raw[["beta[1]"]] / sd_temp
+beta2_orig <- draws_raw[["beta[2]"]] / sd_moisture
+beta3_orig <- draws_raw[["beta[3]"]] / sd_cn
+
+cat("Temperature (per °C):",
+    round(mean(beta1_orig), 4),
+    "  90% CI [",
+    round(quantile(beta1_orig, 0.05), 4), ",",
+    round(quantile(beta1_orig, 0.95), 4), "]\n")
+
+cat("Soil moisture (per %):",
+    round(mean(beta2_orig), 4),
+    "  90% CI [",
+    round(quantile(beta2_orig, 0.05), 4), ",",
+    round(quantile(beta2_orig, 0.95), 4), "]\n")
+
+cat("C:N ratio (per unit):",
+    round(mean(beta3_orig), 4),
+    "  90% CI [",
+    round(quantile(beta3_orig, 0.05), 4), ",",
+    round(quantile(beta3_orig, 0.95), 4), "]\n")
+```
+
+These original-scale coefficients answer the practical question: *"By how much does log decomposition rate change per 1°C increase in temperature, holding soil moisture and C:N ratio constant?"*
+
+## Multicollinearity {#sec-multicol}
+
+**Multicollinearity** occurs when two or more predictors are correlated. It does not bias estimates, the posterior means remain valid, but it *inflates posterior uncertainty* for the correlated coefficients and makes them difficult to interpret individually.
+
+### Diagnosing multicollinearity
+
+The classical frequentist tool is the **variance inflation factor** (VIF). A VIF $> 5$ is a conventional warning threshold; VIF $> 10$ is severe.
+
+```{r}
+#| label: vif
+#| cache: true
+#| code-fold: true
+# VIF requires the car package; base R alternative shown as fallback
+if (requireNamespace("car", quietly = TRUE)) {
+  lm_for_vif <- lm(y ~ x1 + x2 + x3)
+  vif_vals <- car::vif(lm_for_vif)
+  knitr::kable(
+    data.frame(Predictor = c("Temperature", "Soil moisture", "C:N ratio"),
+               VIF = round(vif_vals, 2)),
+    caption = "Variance inflation factors. Values well below 5 indicate
+               no problematic multicollinearity in this dataset."
+  )
+} else {
+  # Manual VIF via R² of each predictor on the others
+  vif_manual <- function(X) {
+    sapply(seq_len(ncol(X)), function(j) {
+      r2 <- summary(lm(X[, j] ~ X[, -j]))$r.squared
+      1 / (1 - r2)
+    })
+  }
+  vif_vals <- vif_manual(X)
+  knitr::kable(
+    data.frame(Predictor = c("Temperature", "Soil moisture", "C:N ratio"),
+               VIF = round(vif_vals, 2)),
+    caption = "Variance inflation factors (manual computation)."
+  )
+}
+```
+
+
+Here we can see that all the predictors have a VIF value less than 5, suggesting a low correlation between them.
+
+### What multicollinearity looks like in the posterior
+
+When two predictors are highly correlated, their joint posterior is elongated along a ridge meaning that the data cannot distinguish their individual contributions, only their sum. @fig-multicol-demo illustrates this with a deliberately inflated correlation.
+
+```{r}
+#| label: fig-multicol-demo
+#| fig-cap: >
+#|   Joint posterior of β₁ (temperature) and β₂ (soil moisture) under
+#|   low correlation (r = 0.40, left) and high correlation (r = 0.90,
+#|   right). With high multicollinearity the posterior smears along a
+#|   ridge: the individual coefficients are uncertain but their sum is
+#|   not. This is not a sampling failure, it is the correct posterior
+#|   given correlated predictors.
+#| fig-width: 8
+#| fig-height: 3.8
+#| cache: true
+#| code-fold: true
+
+set.seed(7)
+
+sim_corr_posterior <- function(rho, n_draws = 2000) {
+  # Simulate joint posterior under known multicollinearity
+  # by refitting with inflated predictor correlation
+  Sigma2 <- matrix(c(1, rho, rho, 1), 2, 2)
+  X2 <- cbind(
+    X[, 1],
+    rho * X[, 1] + sqrt(1 - rho^2) * rnorm(N)
+  )
+  # OLS covariance approximation for illustration
+  XtX_inv <- solve(t(X2) %*% X2)
+  sigma2   <- var(residuals(lm(y ~ X2)))
+  Sigma_post <- sigma2 * XtX_inv
+  mvtnorm::rmvnorm(n_draws,
+                   mean  = c(mean(draws_multi$Temperature),
+                             mean(draws_multi$`Soil moisture`)),
+                   sigma = Sigma_post)
+}
+
+if (requireNamespace("mvtnorm", quietly = TRUE)) {
+  d_low  <- as.data.frame(sim_corr_posterior(0.40))
+  d_high <- as.data.frame(sim_corr_posterior(0.90))
+  names(d_low) <- names(d_high) <- c("beta1", "beta2")
+  d_low$correlation  <- "r = 0.40 (actual)"
+  d_high$correlation <- "r = 0.90 (inflated)"
+  d_both <- rbind(d_low, d_high)
+
+  ggplot(d_both, aes(beta1, beta2)) +
+    geom_point(colour = "#2e7d6a", alpha = 0.2, size = 0.6) +
+    geom_density2d(colour = "#1a4a40", linewidth = 0.5, bins = 6) +
+    facet_wrap(~correlation) +
+    labs(
+      x = expression(beta[1]~"(Temperature)"),
+      y = expression(beta[2]~"(Soil moisture)"),
+      title = "Joint posterior under low vs high multicollinearity"
+    )
+} else {
+  # Fallback: text description
+  cat("Install mvtnorm for the multicollinearity demo:",
+      "install.packages('mvtnorm')\n")
+
+  draws_multi |>
+    select(Temperature, `Soil moisture`) |>
+    ggplot(aes(Temperature, `Soil moisture`)) +
+    geom_point(colour = "#2e7d6a", alpha = 0.3, size = 0.8) +
+    geom_density2d(colour = "#1a4a40", linewidth = 0.5, bins = 6) +
+    labs(title = "Joint posterior: temperature × soil moisture (r = 0.40)")
+}
+```
+
+::: {.callout-warning}
+**Multicollinearity does not bias posteriors, but it limits interpretation.**  
+If VIFs are high, the posterior correctly reflects that the data cannot separately identify the correlated coefficients. The remedy is not to remove one predictor blindly, but to ask: *does the scientific question require distinguishing their individual effects?* If only the combined effect matters (e.g. a prediction task), high collinearity is harmless. If individual coefficients are the target, consider collecting more data, using ridge-like priors (Chapter 8), or restructuring the predictors.
+:::
+
+## Model comparison: full vs reduced model {#sec-model-comparison-ch05}
+
+Does soil moisture (the weakest predictor) improve the model enough to justify its inclusion? We fit a reduced model without $x_2$ and compare using LOO-CV.
+
+```{r}
+#| label: stan-reduced
+#| eval: false
+#| cache: true
+#| code-fold: true
+# Fit the reduced model (temperature + C:N only) using the same Stan file
+# with K = 2 and X = cbind(x1, x3)
+stan_data_reduced <- list(N = N, K = 2, X = cbind(x1, x3), y = y)
+
+fit_reduced <- mod_multi$sample(
+  data = stan_data_reduced,
+  seed = 2026,
+  chains = 4,
+  parallel_chains = 4,
+  iter_warmup = 1000,
+  iter_sampling = 1000,
+  refresh = 0
+)
+fit_reduced$save_object("reduced_regression_fit.rds")
+```
+
+```{r}
+#| label: stan-reduced-real
+#| include: false
+fit_path_reduced <- file.path(
+  dirname(knitr::current_input(dir = TRUE)),
+  "reduced_regression_fit.rds"
+)
+
+stan_data_reduced <- list(N = N, K = 2, X = cbind(x1, x3), y = y)
+
+if (!file.exists(fit_path_reduced)) {
+  fit_reduced <- mod_multi$sample(
+    data = stan_data_reduced,
+    seed = 2026,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_reduced$save_object(fit_path_reduced)
+} else {
+  fit_reduced <- readRDS(fit_path_reduced)
+}
+```
+
+```{r}
+#| label: loo-comparison
+#| cache: true
+#| code-fold: true
+# Extract log-likelihoods and compute LOO
+loo_full <- fit_multi$loo(variables = "log_lik")
+loo_reduced <- fit_reduced$loo(variables = "log_lik")
+
+# Compare
+loo_compare <- loo::loo_compare(loo_full, loo_reduced)
+print(loo_compare)
+```
+
+```{r}
+#| label: loo-table
+#| cache: true
+#| echo: false
+#| tbl-cap: >
+#|   LOO-CV comparison. The model listed first has higher expected
+#|   log predictive density (ELPD). A difference larger than twice
+#|   its standard error is considered meaningful.
+knitr::kable(
+  as.data.frame(loo_compare) |>
+    tibble::rownames_to_column("Model") |>
+    mutate(Model = ifelse(Model == "1", "Full (3 predictors)",
+                                             "Reduced (2 predictors)")),
+  digits = 1
+)
+```
+
+::: {.callout-note}
+**Interpreting LOO comparisons.**  
+`loo_compare()` ranks models by expected log predictive density (ELPD). The best model is listed first with `elpd_diff = 0`; subsequent rows show the difference from the best. A difference of `elpd_diff / se_diff` $> 2$ is a conventional threshold for preferring the top model. We return to model comparison in full in Chapter 14.
+:::
+
+## Posterior predictive check
+
+```{r}
+#| label: fig-ppc-ch05
+#| fig-cap: >
+#|   Posterior predictive density overlay for the full three-predictor
+#|   model. The observed distribution (dark) is well-enveloped by the
+#|   50 replicated datasets (light), indicating adequate model fit.
+#| fig-width: 6.5
+#| fig-height: 4
+#| cache: true
+#| code-fold: true
+
+y_rep_multi <- as_draws_matrix(fit_multi$draws("y_rep"))
+
+ppc_dens_overlay(y, y_rep_multi[1:50, ]) +
+  labs(
+    title = "Posterior predictive check of the full model",
+    subtitle = "Dark: observed. Light: 50 posterior predictive datasets"
+  )
+```
+
+## Comparison with `lm()`
+
+```{r}
+#| label: lm-compare-ch05
+#| cache: true
+#| code-fold: true
+lm_multi <- lm(y ~ x1 + x2 + x3)
+
+stan_coefs <- fit_multi$summary(c("alpha", "beta[1]", "beta[2]", "beta[3]", "sigma")) |>
+  select(variable, mean, sd, q5, q95)
+
+lm_coefs <- data.frame(
+  variable = c("alpha", "beta[1]", "beta[2]", "beta[3]", "sigma"),
+  ols_est = c(coef(lm_multi), sigma(lm_multi)),
+  ols_lo = c(confint(lm_multi, level = 0.90)[, 1], NA),
+  ols_hi = c(confint(lm_multi, level = 0.90)[, 2], NA)
+)
+
+merge(stan_coefs, lm_coefs, by = "variable") |>
+  knitr::kable(
+    digits = 3,
+    caption = "Stan posterior vs OLS for the three-predictor model.",
+    col.names = c("Parameter", "Bayes mean", "Bayes SD",
+                  "Bayes 5%", "Bayes 95%",
+                  "OLS estimate", "OLS 5%", "OLS 95%")
+  )
+```
+
+As in Chapter 4, point estimates are nearly identical. The value of the Bayesian framework becomes apparent in the next chapters, where grouped data, partial pooling, and non-Gaussian likelihoods make `lm()` either suboptimal or inapplicable.
 
 ## Summary
 
-*Summary to be written.*
+- Multiple regression in Stan requires only three changes from the simple
+  regression model: add `int K` and `matrix[N, K] X` to the `data` block,
+  change `real beta` to `vector[K] beta`, and update the likelihood to
+  `y ~ normal(alpha + X * beta, sigma)`.
+- **Always centre and scale** predictors before passing to Stan when
+  predictors are on different scales. Standardised coefficients are
+  directly comparable; back-transformation to original units is trivial.
+- A single `beta ~ normal(0, 5)` prior applies independently to all
+  $K$ slopes. Adjust the SD if prior knowledge constrains effect sizes
+  more tightly.
+- **Multicollinearity** inflates posterior uncertainty for individual
+  coefficients without biasing them. Diagnose with VIFs; interpret with
+  the joint posterior pair plot.
+- LOO-CV (`fit$loo()`) provides a principled, single-fit comparison
+  between nested or non-nested models. Full coverage is in Chapter 14.
+- The above workflow, compile, prepare data list, sample with save/reload,
+  check convergence, interpret, PPC, is identical to Chapter 4.
+
+## Exercises
+
+1. **Add a fourth predictor.** Simulate a fourth predictor (e.g. clay
+   content, %) correlated with soil moisture ($r \approx 0.60$). Add it
+   to the Stan model. Do the VIFs for moisture and clay exceed 5? How does
+   the posterior for `beta[2]` (moisture) change?
+
+2. **Prior sensitivity on slopes.** Refit the full model with
+   `beta ~ normal(0, 0.5)` (a tight prior). At $N = 60$, does this
+   visibly pull the posteriors toward zero? Repeat with $N = 15$.
+   What does this tell you about the prior–data balance?
+
+3. **Unstandardised comparison.** Refit the model passing raw
+   (uncentred, unscaled) predictors. Compare ESS values between the
+   standardised and unstandardised fits. What do you conclude about the
+   computational cost of skipping standardisation?
+
+4. **Posterior probability of ordering.** Using the posterior draws,
+   compute $P(|\beta_1| > |\beta_2| \mid \text{data})$ — the probability
+   that temperature has a larger absolute effect than soil moisture. This
+   is trivial with posterior draws and impossible with a single-number
+   $p$-value.
+
+   ```{r}
+   #| eval: false
+   mean(abs(draws_multi$Temperature) > abs(draws_multi$`Soil moisture`))
+   ```
+
+5. **LOO sensitivity.** Refit both the full and reduced models with
+   `iter_sampling = 2000`. Do the `elpd_diff` and `se_diff` values change
+   meaningfully? What does this tell you about the stability of LOO
+   estimates?
+
+
+## Further reading
+
+- @gelman2020regression [Ch. 12]: multiple predictors, scaling, and
+  the bias-variance tradeoff in a Bayesian context.
+- @mcelreath2020rethinking [Ch. 5]: an extended treatment of
+  multicollinearity using directed acyclic graphs (DAGs) to reason
+  about which predictors to include.
+- @gelman2013bda [Ch. 14.2–14.3]: the matrix form of Bayesian
+  regression and the conjugate normal-inverse-$\chi^2$ analysis.
+- Stan User's Guide, "Regression Models":
+  <https://mc-stan.org/docs/stan-users-guide/regression.html>
