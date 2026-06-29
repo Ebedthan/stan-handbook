@@ -447,12 +447,12 @@ window.Quarto = {
 </ul></section><section id="the-gap-between-fitting-and-specifying" class="level2" data-number="1.3"><h2 data-number="1.3" class="anchored" data-anchor-id="the-gap-between-fitting-and-specifying">
 <span class="header-section-number">1.3</span> The gap between fitting and specifying</h2>
 <p>When you call <code>lm(yield ~ treatment + block, data = field_trial)</code>, you are <em>fitting</em> a model which means R finds parameter estimates and standard errors, and returns them. What you are not doing is <em>specifying</em> a model. The statistical assumptions (normal errors, constant variance, independence) are baked in. The algorithm (ordinary least squares in this case) is fixed. There is no mechanism for expressing what you know about crop yields before seeing the data.</p>
-<p>This works well most of the time. For a balanced, replicated field trial with continuous outcomes, <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> is hard to beat. But life-science data are rarely this clean:</p>
+<p>This works well most of the time. For a balanced, replicated field trial with continuous outcomes, <code><a href="https://rdrr.io/r/stats/lm.html">lm()</a></code> is hard to beat. But life science data are rarely this clean:</p>
 <ul>
 <li><p>Outcomes are often counts, proportions, or presence/absence.</p></li>
 <li><p>Observations are grouped (plots within farms, samples within subjects, leaves within trees) and genuinely not independent.</p></li>
 <li><p>Sample sizes are small and estimates are uncertain in ways that a single point estimate and standard error cannot capture.</p></li>
-<li><p>Prior knowledge (about plausible effect sizes, about measurement error, about the biology) exists and could (and I think should whenever possible) inform the analysis.</p></li>
+<li><p>Prior knowledge (about plausible effect sizes, about measurement error, about the biology) exists and could (and I think should, whenever possible) inform the analysis.</p></li>
 </ul>
 <p>As soon as one of these complications arises, black-box software either forces you into a pre-built model family or invites you to ignore the problem entirely. Stan takes a different stance: <em>you write the model, Stan fits it.</em></p>
 </section><section id="what-stan-is" class="level2" data-number="1.4"><h2 data-number="1.4" class="anchored" data-anchor-id="what-stan-is">
@@ -588,7 +588,7 @@ Table&nbsp;1.1: Statistical modelling tools and their trade-offs.
 <li><p>What is the 90% credible interval for the expected yield difference between treatments?</p></li>
 <li><p>If I had to act on this result, what range of outcomes should I plan for?</p></li>
 </ul>
-<p>This matters especially in applied ecology and agronomy, where the cost of a wrong decision is real and decisions are made under genuine uncertainty.</p>
+<p>This matters especially in medecine, applied ecology or agronomy, where the cost of a wrong decision is real and decisions are made under genuine uncertainty.</p>
 </section><section id="small-samples-rare-events-partial-information" class="level3" data-number="1.6.3"><h3 data-number="1.6.3" class="anchored" data-anchor-id="small-samples-rare-events-partial-information">
 <span class="header-section-number">1.6.3</span> Small samples, rare events, partial information</h3>
 <p>Bayesian methods, and Stan in particular, handle small samples gracefully because prior information contributes to inference when data are sparse. A frequentist mixed model may fail to converge with five observations per group; a Stan model with a sensible prior will return a posterior that honestly reflects both the data and the prior, with appropriately wide uncertainty.</p>
@@ -597,10 +597,10 @@ Table&nbsp;1.1: Statistical modelling tools and their trade-offs.
 <span class="header-section-number">1.7</span> What this handbook will teach you</h2>
 <p>This handbook takes you from the <code>.stan</code> file for a simple linear regression all the way to hierarchical models, generalised linear models, and the practical skills (diagnostics, model comparison, debugging) that let you use Stan confidently in your own research.</p>
 <p>The path follows your existing statistical knowledge:</p>
-<pre><code>lm()  =&gt;  Chapter 4 (simple linear regression in Stan)
+<pre><code>lm() =&gt;  Chapter 4 (simple linear regression in Stan)
 aov() =&gt;  Chapters 6-7 (one-way and two-way ANOVA in Stan)
 lmer() =&gt; Chapters 8-10 (hierarchical models in Stan)
-glm()  =&gt; Chapters 11-12 (GLMs in Stan)</code></pre>
+glm() =&gt; Chapters 11-12 (GLMs in Stan)</code></pre>
 <p>Each step translates something you already know into Stan’s language. By the time you reach the end, you will not just know <em>how</em> to use Stan, you will understand <em>why</em> your model works, and you will be equipped to build models that no wrapper package can express.</p>
 </section><section id="summary" class="level2" data-number="1.8"><h2 data-number="1.8" class="anchored" data-anchor-id="summary">
 <span class="header-section-number">1.8</span> Summary</h2>

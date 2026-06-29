@@ -27,7 +27,7 @@ By the end of this chapter you will be able to:
 
 When you call `lm(yield ~ treatment + block, data = field_trial)`, you are *fitting* a model which means R finds parameter estimates and standard errors, and returns them. What you are not doing is *specifying* a model. The statistical assumptions (normal errors, constant variance, independence) are baked in. The algorithm (ordinary least squares in this case) is fixed. There is no mechanism for expressing what you know about crop yields before seeing the data.
 
-This works well most of the time. For a balanced, replicated field trial with continuous outcomes, `lm()` is hard to beat. But life-science data are rarely this clean:
+This works well most of the time. For a balanced, replicated field trial with continuous outcomes, `lm()` is hard to beat. But life science data are rarely this clean:
 
 - Outcomes are often counts, proportions, or presence/absence.
 
@@ -36,7 +36,7 @@ This works well most of the time. For a balanced, replicated field trial with co
 - Sample sizes are small and estimates are uncertain in ways that a single point estimate and standard error cannot capture.
 
 - Prior knowledge (about plausible effect sizes, about measurement error,
-  about the biology) exists and could (and I think should whenever possible) inform the analysis.
+  about the biology) exists and could (and I think should, whenever possible) inform the analysis.
 
 As soon as one of these complications arises, black-box software either forces you into a pre-built model family or invites you to ignore the problem entirely. Stan takes a different stance: *you write the model, Stan fits it.*
 
@@ -132,7 +132,7 @@ Stan returns *distributions*, not point estimates. For a slope parameter $\beta$
 
 - If I had to act on this result, what range of outcomes should I plan for?
 
-This matters especially in applied ecology and agronomy, where the cost of a wrong decision is real and decisions are made under genuine uncertainty.
+This matters especially in medicine, applied ecology or agronomy, where the cost of a wrong decision is real and decisions are made under genuine uncertainty.
 
 ### Small samples, rare events, partial information
 
@@ -148,10 +148,10 @@ This handbook takes you from the `.stan` file for a simple linear regression all
 The path follows your existing statistical knowledge:
 
 ```
-lm()  =>  Chapter 4 (simple linear regression in Stan)
+lm() =>  Chapter 4 (simple linear regression in Stan)
 aov() =>  Chapters 6-7 (one-way and two-way ANOVA in Stan)
 lmer() => Chapters 8-10 (hierarchical models in Stan)
-glm()  => Chapters 11-12 (GLMs in Stan)
+glm() => Chapters 11-12 (GLMs in Stan)
 ```
 
 Each step translates something you already know into Stan's language. By the time you reach the end, you will not just know *how* to use Stan, you will understand *why* your model works, and you will be equipped to build models that no wrapper package can express.

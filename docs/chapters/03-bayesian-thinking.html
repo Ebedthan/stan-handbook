@@ -484,7 +484,7 @@ window.Quarto = {
 \]</span></p>
 <p>where <span class="math inline">\(\theta\)</span> is the parameter (or vector of parameters) you want to learn, and <span class="math inline">\(y\)</span> is the data you observed. The <span class="math inline">\(\propto\)</span> symbol means “proportional to”. For informed reader, not that we drop the normalising constant <span class="math inline">\(p(y)\)</span> (the <em>marginal likelihood</em>) because Stan never needs to compute it.</p>
 <p>To gain a clear and in-depth understanding of the derivation of this formula, I highly recommend the <a href="https://pos5747.github.io/notes/"><em>Modern Probability Modeling</em></a> course by <a href="https://www.carlislerainey.com/">Carlisle Rainey</a>. It is one of my favorite resources on the subject.</p>
-<p>Let us unpack each term.</p>
+<p>Now let us unpack each term.</p>
 <section id="the-prior-ptheta" class="level3" data-number="3.4.1"><h3 data-number="3.4.1" class="anchored" data-anchor-id="the-prior-ptheta">
 <span class="header-section-number">3.4.1</span> The prior: <span class="math inline">\(p(\theta)\)</span>
 </h3>
@@ -817,7 +817,7 @@ Figure&nbsp;3.3: Three prior types for a location parameter. The flat prior (das
 <span class="header-section-number">3.7.2</span> Why Stan’s MCMC is especially good</h3>
 <p>Classic MCMC algorithms (Gibbs sampling, used by JAGS and BUGS) propose new parameter values by taking random steps. In high-dimensional or strongly-correlated posteriors, most random steps are rejected. This is due to the fact that the chain mixes slowly and you need millions of iterations to get reliable estimates.</p>
 <p>Rather, stan uses <strong>Hamiltonian Monte Carlo</strong> (HMC), which borrows an analogy from physics. It treats the negative log posterior as a potential energy surface and simulates the trajectory of a particle with momentum rolling across that surface. The particle moves efficiently through curved, high-dimensional posteriors that would defeat a random-walk sampler <span class="citation" data-cites="betancourt2017conceptual">(<a href="../references.html#ref-betancourt2017conceptual" role="doc-biblioref">Betancourt 2017</a>)</span>.</p>
-<p>The specific variant Stan uses — the <strong>No-U-Turn Sampler</strong> (NUTS) — also automatically tunes the step size and trajectory length during warmup, so you rarely need to touch these settings manually.</p>
+<p>The specific variant Stan uses, the <strong>No-U-Turn Sampler</strong> (NUTS), also automatically tunes the step size and trajectory length during warmup, so you rarely need to touch these settings manually.</p>
 <p><a href="#fig-mcmc-paths" class="quarto-xref">Figure&nbsp;<span>3.4</span></a> illustrates the difference in exploration efficiency between a slow random-walk chain and an efficient HMC path.</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -826,7 +826,7 @@ Figure&nbsp;3.3: Three prior types for a location parameter. The flat prior (das
 <img src="03-bayesian-thinking_files/figure-html/fig-mcmc-paths-1.png" class="img-fluid figure-img" style="width:95.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mcmc-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3.4: Schematic comparison of Hamiltonian Monte Carlo (right) and random-walk MCMC (left) on a correlated bivariate posterior. The random walk takes many small, mostly rejected steps. HMC follows smooth trajectories that traverse the posterior efficiently.
+Figure&nbsp;3.4: Schematic comparison of Hamiltonian Monte Carlo (left) and random-walk MCMC (right) on a correlated bivariate posterior. The random walk takes many small, mostly rejected steps. HMC follows smooth trajectories that traverse the posterior efficiently.
 </figcaption></figure>
 </div>
 </div>
@@ -851,7 +851,7 @@ Table&nbsp;3.1: Translating questions into posterior calculations.
 <div class="cell-output-display">
 <table class="do-not-create-environment cell caption-top table table-sm table-striped small">
 <colgroup>
-<col style="width: 50%">
+<col style="width: 49%">
 <col style="width: 50%">
 </colgroup>
 <thead><tr class="header">
@@ -861,13 +861,19 @@ Table&nbsp;3.1: Translating questions into posterior calculations.
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">What is the most likely value of μ?</td>
-<td style="text-align: left;">median(draws<span class="math inline">\(mu)                         |
-|How uncertain am I about μ?              |sd(draws\)</span>mu)</td>
+<td style="text-align: left;">median(draws$mu)</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">How uncertain am I about μ?</td>
+<td style="text-align: left;">sd(draws$mu)</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">What is the 90% credible interval for μ?</td>
-<td style="text-align: left;">quantile(draws<span class="math inline">\(mu, c(0.05, 0.95))        |
-|P(μ &gt; 1.5)?                              |mean(draws\)</span>mu &gt; 1.5)</td>
+<td style="text-align: left;">quantile(draws$mu, c(0.05, 0.95))</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">P(μ &gt; 1.5)?</td>
+<td style="text-align: left;">mean(draws$mu &gt; 1.5)</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">What will a new observation look like?</td>
@@ -948,11 +954,11 @@ Figure&nbsp;3.5: The Bayesian modelling workflow. Arrows show the flow from scie
 <span class="header-section-number">3.12</span> Further reading</h2>
 <ul>
 <li>
-<span class="citation" data-cites="mcelreath2020rethinking">McElreath (<a href="../references.html#ref-mcelreath2020rethinking" role="doc-biblioref">2020</a>, Ch. 2–3)</span>: the best intuitive treatment of Bayes’ theorem for life scientists, using grid approximation to build visual understanding before MCMC.</li>
+<span class="citation" data-cites="mcelreath2020rethinking">McElreath (<a href="../references.html#ref-mcelreath2020rethinking" role="doc-biblioref">2020</a>, Ch. 2-3)</span>: the best intuitive treatment of Bayes’ theorem for life scientists, using grid approximation to build visual understanding before MCMC.</li>
 <li>
-<span class="citation" data-cites="gelman2013bda">Gelman et al. (<a href="../references.html#ref-gelman2013bda" role="doc-biblioref">2013</a>, Ch. 1–2)</span>: the authoritative technical treatment; skim Ch. 1 for perspective and Ch. 2 for the conjugate normal model worked out in full.</li>
+<span class="citation" data-cites="gelman2013bda">Gelman et al. (<a href="../references.html#ref-gelman2013bda" role="doc-biblioref">2013</a>, Ch. 1-2)</span>: the authoritative technical treatment; skim Ch. 1 for perspective and Ch. 2 for the conjugate normal model worked out in full.</li>
 <li>
-<span class="citation" data-cites="betancourt2017conceptual">Betancourt (<a href="../references.html#ref-betancourt2017conceptual" role="doc-biblioref">2017</a>)</span>: if you want to understand <em>why</em> HMC works, §2–3 give a geometric intuition without requiring physics background.</li>
+<span class="citation" data-cites="betancourt2017conceptual">Betancourt (<a href="../references.html#ref-betancourt2017conceptual" role="doc-biblioref">2017</a>)</span>: if you want to understand <em>why</em> HMC works, §2-3 give a geometric intuition without requiring physics background.</li>
 <li>
 <span class="citation" data-cites="vehtari2021rank">Vehtari et al. (<a href="../references.html#ref-vehtari2021rank" role="doc-biblioref">2021</a>)</span>: the definitive reference for <span class="math inline">\(\hat{R}\)</span> and ESS; explains why the older <span class="math inline">\(\hat{R}\)</span> was subtly flawed and what the rank-normalised version fixes.</li>
 </ul>

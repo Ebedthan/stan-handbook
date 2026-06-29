@@ -878,7 +878,7 @@ Figure&nbsp;2.2: Schematic trace plots. Left: problematic chains, one chain stuc
 </div>
 </section><section id="initialization-between--2-2-failed-after-100-attempts" class="level3" data-number="2.12.4"><h3 data-number="2.12.4" class="anchored" data-anchor-id="initialization-between--2-2-failed-after-100-attempts">
 <span class="header-section-number">2.12.4</span> “Initialization between (-2, 2) failed after 100 attempts”</h3>
-<p>Stan initialises parameters randomly in the range (−2, 2) on the <em>unconstrained</em> scale. This error means the model’s log posterior could not be evaluated at any of these starting points. This is usually a sign of a mis-specified model or data-block mismatch. Double-check that your <code>stan_data</code> list names exactly match the <code>data</code> block variable names, and that dimensions are correct.</p>
+<p>Stan initialises parameters randomly in the range (-2, 2) on the <em>unconstrained</em> scale. This error means the model’s log posterior could not be evaluated at any of these starting points. This is usually a sign of a mis-specified model or data-block mismatch. Double-check that your <code>stan_data</code> list names exactly match the <code>data</code> block variable names, and that dimensions are correct.</p>
 </section><section id="rhat-is-above-1.01-or-chains-look-like-the-right-panel-in-fig-trace-example" class="level3" data-number="2.12.5"><h3 data-number="2.12.5" class="anchored" data-anchor-id="rhat-is-above-1.01-or-chains-look-like-the-right-panel-in-fig-trace-example">
 <span class="header-section-number">2.12.5</span> <code>rhat</code> is above 1.01 or chains look like the right panel in <a href="#fig-trace-example" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>
 </h3>
@@ -913,9 +913,9 @@ Figure&nbsp;2.2: Schematic trace plots. Left: problematic chains, one chain stuc
 <li>Stan installation guide (all platforms): <a href="https://mc-stan.org/docs/cmdstan-guide/installation.html" class="uri">https://mc-stan.org/docs/cmdstan-guide/installation.html</a>
 </li>
 <li>
-<span class="citation" data-cites="stan2017">Carpenter et al. (<a href="../references.html#ref-stan2017" role="doc-biblioref">2017</a>)</span> — the primary Stan reference; cite this in any publication that uses Stan models.</li>
+<span class="citation" data-cites="stan2017">Carpenter et al. (<a href="../references.html#ref-stan2017" role="doc-biblioref">2017</a>)</span>, the primary Stan reference; cite this in any publication that uses Stan models.</li>
 <li>
-<span class="citation" data-cites="betancourt2017conceptual">Betancourt (<a href="../references.html#ref-betancourt2017conceptual" role="doc-biblioref">2017, sec. 2</a>)</span> — brief, accessible description of HMC warmup and why it matters for setting <code>iter_warmup</code>.</li>
+<span class="citation" data-cites="betancourt2017conceptual">Betancourt (<a href="../references.html#ref-betancourt2017conceptual" role="doc-biblioref">2017, sec. 2</a>)</span>, brief, accessible description of HMC warmup and why it matters for setting <code>iter_warmup</code>.</li>
 </ul>
 
 

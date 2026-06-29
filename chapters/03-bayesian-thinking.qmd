@@ -60,7 +60,7 @@ where $\theta$ is the parameter (or vector of parameters) you want to learn, and
 To gain a clear and in-depth understanding of the derivation of this formula, I highly recommend the [*Modern Probability Modeling*](https://pos5747.github.io/notes/) course by [Carlisle Rainey](https://www.carlislerainey.com/). It is one of my favorite resources on the subject.
 
 
-Let us unpack each term.
+Now let us unpack each term.
 
 ### The prior: $p(\theta)$
 
@@ -450,7 +450,7 @@ Classic MCMC algorithms (Gibbs sampling, used by JAGS and BUGS) propose new para
 
 Rather, stan uses **Hamiltonian Monte Carlo** (HMC), which borrows an analogy from physics. It treats the negative log posterior as a potential energy surface and simulates the trajectory of a particle with momentum rolling across that surface. The particle moves efficiently through curved, high-dimensional posteriors that would defeat a random-walk sampler [@betancourt2017conceptual].
 
-The specific variant Stan uses — the **No-U-Turn Sampler** (NUTS) — also
+The specific variant Stan uses, the **No-U-Turn Sampler** (NUTS), also
 automatically tunes the step size and trajectory length during warmup, so
 you rarely need to touch these settings manually.
 
@@ -460,11 +460,10 @@ between a slow random-walk chain and an efficient HMC path.
 ```{r}
 #| label: fig-mcmc-paths
 #| fig-cap: >
-#|   Schematic comparison of Hamiltonian Monte Carlo (right) and
-#|   random-walk MCMC (left) on a 
-#|   correlated bivariate posterior. The random walk
-#|   takes many small, mostly rejected steps. HMC follows smooth
-#|   trajectories that traverse the posterior efficiently.
+#|   Schematic comparison of Hamiltonian Monte Carlo (left) and
+#|   random-walk MCMC (right) on a correlated bivariate posterior. 
+#|   The random walk takes many small, mostly rejected steps. 
+#|   HMC follows smooth trajectories that traverse the posterior efficiently.
 #| fig-width: 8
 #| fig-height: 4
 #| echo: false
@@ -473,13 +472,13 @@ set.seed(17)
 
 # Simulate a correlated bivariate target (elongated ellipse)
 Sigma <- matrix(c(1, 0.85, 0.85, 1), 2, 2)
-L     <- chol(Sigma)
+L <- chol(Sigma)
 
 # Random-walk path (small steps, slow exploration)
 rw_path <- matrix(c(0, 0), nrow = 1)
 for (i in seq_len(300)) {
   proposal <- tail(rw_path, 1) + rnorm(2, 0, 0.18) %*% L
-  log_r    <- -(sum(proposal^2) - sum(tail(rw_path,1)^2)) / 2
+  log_r <- -(sum(proposal^2) - sum(tail(rw_path,1)^2)) / 2
   if (log(runif(1)) < log_r) {
     rw_path <- rbind(rw_path, proposal)
   } else {
@@ -495,23 +494,23 @@ rw_df <- data.frame(
 # HMC-like smooth trajectory (simulate leapfrog arcs)
 hmc_pts <- list(c(-1.5, -1.5))
 for (i in seq_len(18)) {
-  start  <- tail(hmc_pts, 1)[[1]]
-  theta  <- runif(1, 0, 2*pi)
+  start <- tail(hmc_pts, 1)[[1]]
+  theta <- runif(1, 0, 2*pi)
   radius <- runif(1, 0.6, 1.4)
-  arc    <- seq(theta, theta + runif(1, pi*0.4, pi*0.9), length.out = 12)
-  pts    <- lapply(arc, function(a)
+  arc <- seq(theta, theta + runif(1, pi*0.4, pi*0.9), length.out = 12)
+  pts <- lapply(arc, function(a)
     start + c(radius * cos(a), radius * 0.55 * sin(a)) %*% L)
   hmc_pts <- c(hmc_pts, pts)
 }
 hmc_mat <- do.call(rbind, hmc_pts)
-hmc_df  <- data.frame(
+hmc_df <- data.frame(
   x = hmc_mat[, 1], y = hmc_mat[, 2],
   step = seq_len(nrow(hmc_mat)),
   method = "Random-walk MCMC"
 )
 
 # Contour data
-grid  <- expand.grid(x = seq(-3, 3, length.out = 80),
+grid <- expand.grid(x = seq(-3, 3, length.out = 80),
                      y = seq(-3, 3, length.out = 80))
 z_val <- with(grid,
   exp(-0.5 * (x^2 - 2*0.85*x*y + y^2) / (1 - 0.85^2)))
@@ -537,7 +536,7 @@ ggplot() +
   facet_wrap(~method) +
   labs(x = expression(theta[1]), y = expression(theta[2])) +
   theme(
-    strip.text      = element_text(face = "bold", size = 10),
+    strip.text = element_text(face = "bold", size = 10),
     legend.position = "none"
   )
 ```
@@ -581,11 +580,11 @@ df_calc <- data.frame(
     "What will a new observation look like?"
   ),
   Calculation = c(
-    "median(draws$mu)",
-    "sd(draws$mu)",
-    "quantile(draws$mu, c(0.05, 0.95))",
-    "mean(draws$mu > 1.5)",
-    "draws$y_rep  (from generated quantities)"
+    "median(draws\\$mu)",
+    "sd(draws\\$mu)",
+    "quantile(draws\\$mu, c(0.05, 0.95))",
+    "mean(draws\\$mu > 1.5)",
+    "draws\\$y_rep  (from generated quantities)"
   )
 )
 
@@ -599,9 +598,7 @@ binary hypothesis tests.
 
 ## The Bayesian workflow
 
-Before closing, it helps to see how the three concepts discussed here (prior, likelihood,
-posterior) fit into a complete analysis cycle (@fig-workflow). This cycle
-recurs in every chapter of this handbook.
+Before closing, it helps to see how the three concepts discussed here (prior, likelihood, posterior) fit into a complete analysis cycle (@fig-workflow). This cycle recurs in every chapter of this handbook.
 
 ```{mermaid}
 %%| label: fig-workflow
@@ -637,15 +634,9 @@ flowchart LR
 
 ## Summary
 
-- **Bayes' theorem** combines the prior $p(\theta)$ and the likelihood
-  $p(y \mid \theta)$ into the posterior $p(\theta \mid y)$. The posterior
-  is proportional to their product.
-- The **prior** encodes pre-experiment knowledge as a distribution over
-  parameters. Weakly informative priors are the practical default: they rule
-  out implausible values without dominating the data.
-- The **likelihood** scores how probable the observed data are under each
-  candidate parameter value. It is a function of $\theta$, not a
-  distribution over $\theta$.
+- **Bayes' theorem** combines the prior $p(\theta)$ and the likelihood $p(y \mid \theta)$ into the posterior $p(\theta \mid y)$. The posterior is proportional to their product.
+- The **prior** encodes pre-experiment knowledge as a distribution over parameters. Weakly informative priors are the practical default: they rule out implausible values without dominating the data.
+- The **likelihood** scores how probable the observed data are under each candidate parameter value. It is a function of $\theta$, not a distribution over $\theta$.
 - The **posterior** narrows and shifts toward the data as observations
   accumulate. With enough data, the prior is overwhelmed.
 - **MCMC** draws samples from the posterior without computing it directly.
@@ -688,14 +679,14 @@ flowchart LR
 
 ## Further reading
 
-- @mcelreath2020rethinking [Ch. 2–3]: the best intuitive treatment of
+- @mcelreath2020rethinking [Ch. 2-3]: the best intuitive treatment of
   Bayes' theorem for life scientists, using grid approximation to build
   visual understanding before MCMC.
-- @gelman2013bda [Ch. 1–2]: the authoritative technical treatment; skim
+- @gelman2013bda [Ch. 1-2]: the authoritative technical treatment; skim
   Ch. 1 for perspective and Ch. 2 for the conjugate normal model worked
   out in full.
 - @betancourt2017conceptual: if you want to understand *why* HMC works,
-  §2–3 give a geometric intuition without requiring physics background.
+  §2-3 give a geometric intuition without requiring physics background.
 - @vehtari2021rank: the definitive reference for $\hat{R}$ and ESS;
   explains why the older $\hat{R}$ was subtly flawed and what the
   rank-normalised version fixes.

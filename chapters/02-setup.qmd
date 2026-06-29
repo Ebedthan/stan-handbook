@@ -588,7 +588,7 @@ specified model, or high posterior correlation between parameters. Try
 - cmdstanr documentation: <https://mc-stan.org/cmdstanr/>
 - Stan installation guide (all platforms):
   <https://mc-stan.org/docs/cmdstan-guide/installation.html>
-- @stan2017 — the primary Stan reference; cite this in any publication
+- @stan2017, the primary Stan reference; cite this in any publication
   that uses Stan models.
-- @betancourt2017conceptual [§2] — brief, accessible description of HMC
+- @betancourt2017conceptual [§2], brief, accessible description of HMC
   warmup and why it matters for setting `iter_warmup`.
