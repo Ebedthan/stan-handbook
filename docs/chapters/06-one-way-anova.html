@@ -51,7 +51,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
@@ -67,12 +87,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark"><script id="quarto-search-options" type="application/json">{
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light"><script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
   "collapse-after": 3,
@@ -98,7 +116,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
-}</script>
+}</script><script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script><script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 </head>
 <body class="nav-sidebar floating">
 
@@ -107,7 +150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">Part II - The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/06-one-way-anova.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/06-one-way-anova.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -119,9 +162,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto"><div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="../">Writing Statistical Models in Stan</a> 
-        <div class="sidebar-tools-main tools-wide">
+        <div class="sidebar-tools-main">
     <a href="https://github.com/Ebedthan/stan-handbook" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
   <a href="" class="quarto-reader-toggle quarto-navigation-tool px-1" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
   <div class="quarto-reader-toggle-btn">
   <i class="bi"></i>
@@ -146,7 +188,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Part I - Getting Started</span></a>
+ <span class="menu-text">Getting Started</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -175,7 +217,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Part II - The Linear World</span></a>
+ <span class="menu-text">The Linear World</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -210,7 +252,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Part III - Hierarchical Models</span></a>
+ <span class="menu-text">Hierarchical Models</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -239,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Part IV - Beyond the Normal</span></a>
+ <span class="menu-text">Beyond the Normal</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -262,7 +304,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
             <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Part V - Good Practice and Going Further</span></a>
+ <span class="menu-text">Good Practice and Going Further</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
@@ -355,17 +397,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">6.1</span> Overview</a></li>
-  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">6.2</span> Learning objectives</a></li>
-  <li><a href="#content" id="toc-content" class="nav-link" data-scroll-target="#content"><span class="header-section-number">6.3</span> Content</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">6.4</span> Exercises</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6.5</span> Summary</a></li>
+  <li><a href="#sec-anova-is-regression" id="toc-sec-anova-is-regression" class="nav-link" data-scroll-target="#sec-anova-is-regression"><span class="header-section-number">6.2</span> ANOVA is regression</a></li>
+  <li><a href="#running-example-soil-carbon-under-land-use-types" id="toc-running-example-soil-carbon-under-land-use-types" class="nav-link" data-scroll-target="#running-example-soil-carbon-under-land-use-types"><span class="header-section-number">6.3</span> Running example: soil carbon under land use types</a></li>
+  <li>
+<a href="#sec-treatment" id="toc-sec-treatment" class="nav-link" data-scroll-target="#sec-treatment"><span class="header-section-number">6.4</span> Parameterisation 1: treatment coding</a>
+  <ul class="collapse">
+<li><a href="#the-stan-model" id="toc-the-stan-model" class="nav-link" data-scroll-target="#the-stan-model"><span class="header-section-number">6.4.1</span> The Stan model</a></li>
+  <li><a href="#key-design-decisions" id="toc-key-design-decisions" class="nav-link" data-scroll-target="#key-design-decisions"><span class="header-section-number">6.4.2</span> Key design decisions</a></li>
+  <li><a href="#compile-and-sample" id="toc-compile-and-sample" class="nav-link" data-scroll-target="#compile-and-sample"><span class="header-section-number">6.4.3</span> Compile and sample</a></li>
+  <li><a href="#convergence-and-summary" id="toc-convergence-and-summary" class="nav-link" data-scroll-target="#convergence-and-summary"><span class="header-section-number">6.4.4</span> Convergence and summary</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-sumtozero" id="toc-sec-sumtozero" class="nav-link" data-scroll-target="#sec-sumtozero"><span class="header-section-number">6.5</span> Parameterisation 2: sum-to-zero coding</a>
+  <ul class="collapse">
+<li><a href="#why-sum-to-zero" id="toc-why-sum-to-zero" class="nav-link" data-scroll-target="#why-sum-to-zero"><span class="header-section-number">6.5.1</span> Why sum-to-zero?</a></li>
+  <li><a href="#the-stan-model-1" id="toc-the-stan-model-1" class="nav-link" data-scroll-target="#the-stan-model-1"><span class="header-section-number">6.5.2</span> The Stan model</a></li>
+  <li><a href="#compile-and-sample-1" id="toc-compile-and-sample-1" class="nav-link" data-scroll-target="#compile-and-sample-1"><span class="header-section-number">6.5.3</span> Compile and sample</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-contrasts" id="toc-sec-contrasts" class="nav-link" data-scroll-target="#sec-contrasts"><span class="header-section-number">6.6</span> Group means and pairwise comparisons</a>
+  <ul class="collapse">
+<li><a href="#posterior-group-means" id="toc-posterior-group-means" class="nav-link" data-scroll-target="#posterior-group-means"><span class="header-section-number">6.6.1</span> Posterior group means</a></li>
+  <li><a href="#pairwise-contrasts" id="toc-pairwise-contrasts" class="nav-link" data-scroll-target="#pairwise-contrasts"><span class="header-section-number">6.6.2</span> Pairwise contrasts</a></li>
+  </ul>
+</li>
+  <li>
+<a href="#sec-anova-table" id="toc-sec-anova-table" class="nav-link" data-scroll-target="#sec-anova-table"><span class="header-section-number">6.7</span> Connecting to the classical ANOVA table</a>
+  <ul class="collapse">
+<li><a href="#the-classical-table" id="toc-the-classical-table" class="nav-link" data-scroll-target="#the-classical-table"><span class="header-section-number">6.7.1</span> The classical table</a></li>
+  <li><a href="#posterior-r2-and-eta2" id="toc-posterior-r2-and-eta2" class="nav-link" data-scroll-target="#posterior-r2-and-eta2"><span class="header-section-number">6.7.2</span> Posterior <span class="math inline">\(R^2\)</span> and <span class="math inline">\(\eta^2\)</span></a></li>
+  <li><a href="#reconstructing-the-f-statistic" id="toc-reconstructing-the-f-statistic" class="nav-link" data-scroll-target="#reconstructing-the-f-statistic"><span class="header-section-number">6.7.3</span> Reconstructing the <span class="math inline">\(F\)</span>-statistic</a></li>
+  </ul>
+</li>
+  <li><a href="#posterior-predictive-check" id="toc-posterior-predictive-check" class="nav-link" data-scroll-target="#posterior-predictive-check"><span class="header-section-number">6.8</span> Posterior predictive check</a></li>
+  <li><a href="#comparison-with-aov-and-lm" id="toc-comparison-with-aov-and-lm" class="nav-link" data-scroll-target="#comparison-with-aov-and-lm"><span class="header-section-number">6.9</span> Comparison with <code>aov()</code> and <code>lm()</code></a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">6.10</span> Summary</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">6.11</span> Exercises</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">6.12</span> Further reading</a></li>
   </ul><div class="toc-actions"><ul><li><a href="https://github.com/Ebedthan/stan-handbook/edit/main/chapters/06-one-way-anova.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/Ebedthan/stan-handbook/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">Part II - The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/06-one-way-anova.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></a></li></ol></nav><div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">
+<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/04-simple-linear-regression.html">The Linear World</a></li><li class="breadcrumb-item"><a href="../chapters/06-one-way-anova.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span></a></li></ol></nav><div class="quarto-title">
+<h1 class="title">
 <span class="chapter-number">6</span>&nbsp; <span class="chapter-title">One-Way ANOVA in Stan</span>
-</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+</h1>
 </div>
 
 
@@ -381,29 +458,796 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header><section id="overview" class="level2" data-number="6.1"><h2 data-number="6.1" class="anchored" data-anchor-id="overview">
 <span class="header-section-number">6.1</span> Overview</h2>
-<p>Treatment coding, sum-to-zero constraints, and reading ANOVA tables from Stan output.</p>
-</section><section id="learning-objectives" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="learning-objectives">
-<span class="header-section-number">6.2</span> Learning objectives</h2>
+<p>One-way ANOVA is one of the most frequently used tools in life-science research: does the outcome differ across treatment groups? Students learn ANOVA as an <span class="math inline">\(F\)</span>-test delivered by <code><a href="https://rdrr.io/r/stats/aov.html">aov()</a></code>. This chapter shows that ANOVA is not a separate procedure, it is linear regression with a categorical predictor, and it lives in Stan as naturally as the continuous-predictor models of Chapters 4 and 5.</p>
+<p>The chapter introduces two parameterisations of the same model, <strong>treatment coding</strong> and <strong>sum-to-zero coding</strong>, explains why both exist, and shows how to translate Stan posterior output back into the quantities an ANOVA table would report. Along the way, we gain tools that classical ANOVA cannot provide: posterior probabilities for pairwise contrasts, honest uncertainty about group means, and a principled way to handle unbalanced designs.</p>
+<p><strong>Learning objectives</strong>:</p>
 <p>By the end of this chapter you will be able to:</p>
-<ul class="task-list">
-<li><label><input type="checkbox">Objective 1</label></li>
-<li><label><input type="checkbox">Objective 2</label></li>
-<li><label><input type="checkbox">Objective 3</label></li>
-</ul></section><section id="content" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="content">
-<span class="header-section-number">6.3</span> Content</h2>
-<p><em>Content to be written.</em></p>
-</section><section id="exercises" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="exercises">
-<span class="header-section-number">6.4</span> Exercises</h2>
+<ul>
+<li>Explain why one-way ANOVA is a special case of linear regression and write both as a Stan model.</li>
+<li>Choose between treatment coding and sum-to-zero coding, implement each in Stan, and interpret the parameters of each.</li>
+<li>Extract posterior group means, pairwise differences, and their credible intervals directly from Stan draws.</li>
+<li>Reconstruct the quantities reported in a classical ANOVA table (<span class="math inline">\(F\)</span>-statistic, <span class="math inline">\(\eta^2\)</span>) from the posterior, and explain their limitations.</li>
+<li>Perform a posterior predictive check appropriate for grouped data.</li>
+</ul></section><section id="sec-anova-is-regression" class="level2" data-number="6.2"><h2 data-number="6.2" class="anchored" data-anchor-id="sec-anova-is-regression">
+<span class="header-section-number">6.2</span> ANOVA is regression</h2>
+<p>Consider a completely randomised experiment with <span class="math inline">\(K\)</span> groups. The classical ANOVA model is:</p>
+<p><span class="math display">\[
+y_{ij} = \mu + \tau_k + \varepsilon_{ij},
+\qquad \varepsilon_{ij} \sim \text{Normal}(0, \sigma)
+\]</span></p>
+<p>where <span class="math inline">\(\mu\)</span> is the grand mean, <span class="math inline">\(\tau_k\)</span> is the effect of group <span class="math inline">\(k\)</span>, and the constraint <span class="math inline">\(\sum_k \tau_k = 0\)</span> makes the model identifiable.</p>
+<p>Now write this as a regression. Create <span class="math inline">\(K - 1\)</span> binary dummy variables <span class="math inline">\(d_{ik}\)</span>: <span class="math inline">\(d_{ik} = 1\)</span> if observation <span class="math inline">\(i\)</span> belongs to group <span class="math inline">\(k\)</span>, zero otherwise. Then:</p>
+<p><span class="math display">\[
+y_i = \alpha + \beta_2 d_{i2} + \beta_3 d_{i3} + \cdots + \beta_K d_{iK}
++ \varepsilon_i
+\]</span></p>
+<p>Here <span class="math inline">\(\alpha\)</span> is the mean of group 1 (the reference), and <span class="math inline">\(\beta_k\)</span> is the difference between group <span class="math inline">\(k\)</span> and group 1. This is exactly what <code>lm(y ~ factor(group))</code> does in R, the ANOVA and the regression are the same model, just parameterised differently.</p>
+<p>In Stan, we can use <em>either</em> parameterisation. The choice affects how we interpret the parameters but not the predictions or the fit.</p>
+<p><a href="#fig-anova-coding" class="quarto-xref">Figure&nbsp;<span>6.1</span></a> illustrates the two parameterisations side by side.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-anova-coding" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-anova-coding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-one-way-anova_files/figure-html/fig-anova-coding-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anova-coding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Two parameterisations of the same one-way ANOVA model with four groups. Treatment coding (left) sets group 1 as the reference; all parameters are differences from group 1. Sum-to-zero coding (right) centres all effects around the grand mean; the effects sum to zero and the last is derived from the others.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="running-example-soil-carbon-under-land-use-types" class="level2" data-number="6.3"><h2 data-number="6.3" class="anchored" data-anchor-id="running-example-soil-carbon-under-land-use-types">
+<span class="header-section-number">6.3</span> Running example: soil carbon under land use types</h2>
+<p>We model topsoil organic carbon (SOC, g kg⁻¹) across four land use types common in the West African forest-savanna mosaic: natural forest, agroforest, fallow, and cropland. The scientific question is whether land use type is associated with different SOC levels, a one-way ANOVA with <span class="math inline">\(K = 4\)</span> groups.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span><span class="op">(</span><span class="fl">2025</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># True group means (g/kg SOC, broadly consistent with West African</span></span>
+<span><span class="co"># forest-savanna literature)</span></span>
+<span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">4</span></span>
+<span><span class="va">group_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Natural forest"</span>, <span class="st">"Agroforest"</span>, <span class="st">"Fallow"</span>, <span class="st">"Cropland"</span><span class="op">)</span></span>
+<span><span class="va">true_mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">18.5</span>, <span class="fl">14.2</span>, <span class="fl">11.8</span>, <span class="fl">8.4</span><span class="op">)</span>   <span class="co"># group means</span></span>
+<span><span class="va">true_sigma</span> <span class="op">&lt;-</span> <span class="fl">2.8</span>                     <span class="co"># common within-group SD</span></span>
+<span></span>
+<span><span class="co"># Unbalanced design (realistic: fewer forest plots)</span></span>
+<span><span class="va">n_per_group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">14</span>, <span class="fl">14</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span><span class="va">N</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_per_group</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="va">K</span><span class="op">)</span>, times <span class="op">=</span> <span class="va">n_per_group</span><span class="op">)</span></span>
+<span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html">rnorm</a></span><span class="op">(</span><span class="va">N</span>, mean <span class="op">=</span> <span class="va">true_mu</span><span class="op">[</span><span class="va">group</span><span class="op">]</span>, sd <span class="op">=</span> <span class="va">true_sigma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">soc_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  y <span class="op">=</span> <span class="va">y</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">group</span>,</span>
+<span>  group_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">group_names</span><span class="op">[</span><span class="va">group</span><span class="op">]</span>, levels <span class="op">=</span> <span class="va">group_names</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Group means for plot</span></span>
+<span><span class="va">group_means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tapply.html">tapply</a></span><span class="op">(</span><span class="va">y</span>, <span class="va">soc_df</span><span class="op">$</span><span class="va">group_name</span>, <span class="va">mean</span><span class="op">)</span></span>
+<span><span class="va">gm_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  group_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">group_means</span><span class="op">)</span>,</span>
+<span>  mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">group_means</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">soc_df</span>, <span class="fu">aes</span><span class="op">(</span><span class="va">group_name</span>, <span class="va">y</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_jitter</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.12</span>, colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_crossbar</span><span class="op">(</span>data <span class="op">=</span> <span class="va">gm_df</span>,</span>
+<span>                <span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">mean</span>, ymin <span class="op">=</span> <span class="va">mean</span>, ymax <span class="op">=</span> <span class="va">mean</span><span class="op">)</span>,</span>
+<span>                colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, linewidth <span class="op">=</span> <span class="fl">0.9</span>, width <span class="op">=</span> <span class="fl">0.45</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Land use type"</span>,</span>
+<span>    y <span class="op">=</span> <span class="st">"Topsoil SOC (g kg⁻¹)"</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Soil organic carbon by land use type"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure"><p><img src="06-one-way-anova_files/figure-html/simulate-data-ch06-1.png" class="img-fluid figure-img" style="width:95.0%"></p>
+<figcaption>Simulated topsoil organic carbon (SOC, g kg⁻¹) by land use type. Points are individual plot measurements (jittered horizontally); horizontal bars are group means. Cropland has the lowest SOC; natural forest the highest.</figcaption></figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Why an unbalanced design?</strong><br>
+Natural forest plots are often scarcer and harder to access than cropland plots. With <span class="math inline">\(n = (10, 14, 14, 12)\)</span>, this is a mildly unbalanced design. Classical ANOVA handles unbalanced designs awkwardly (Type I vs Type III sums of squares). Bayesian ANOVA handles them transparently, the likelihood simply reflects the different amounts of information in each group.</p>
+</div>
+</div>
+</div>
+</section><section id="sec-treatment" class="level2" data-number="6.4"><h2 data-number="6.4" class="anchored" data-anchor-id="sec-treatment">
+<span class="header-section-number">6.4</span> Parameterisation 1: treatment coding</h2>
+<section id="the-stan-model" class="level3" data-number="6.4.1"><h3 data-number="6.4.1" class="anchored" data-anchor-id="the-stan-model">
+<span class="header-section-number">6.4.1</span> The Stan model</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; K;</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=K&gt; group;</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha;         <span class="co">// reference group mean (group 1)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K<span class="dv">-1</span>] tau;    <span class="co">// deviations from reference (groups 2..K)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] mu;</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  mu[<span class="dv">1</span>] = alpha;</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">2</span>:K)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    mu[k] = alpha + tau[k<span class="dv">-1</span>];</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="dv">10</span>);</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  tau ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    y[i] ~ normal(mu[group[i]], sigma);</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    y_rep[i] = normal_rng(mu[group[i]], sigma);</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    log_lik[i] = normal_lpdf(y[i] | mu[group[i]], sigma);</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section><section id="key-design-decisions" class="level3" data-number="6.4.2"><h3 data-number="6.4.2" class="anchored" data-anchor-id="key-design-decisions">
+<span class="header-section-number">6.4.2</span> Key design decisions</h3>
+<p><strong><code>array[N] int group</code></strong> is Stan’s syntax for an integer array. One group index per observation. Stan 2.26+ uses the <code>array[N] int</code> declaration; older syntax was <code>int group[N]</code>. Always use the modern form.</p>
+<p><strong><code>transformed parameters</code> block.</strong> We assemble the full group mean vector <code>mu</code> here rather than in the <code>model</code> block. This means <code>mu</code> is saved in the posterior draws automatically, we can inspect each group mean without any post-processing arithmetic.</p>
+<p><strong><code>vector[K-1] tau</code></strong> declares <span class="math inline">\(K - 1\)</span> free treatment effects. Group 1 is the reference, so <code>tau[1]</code> is the group 2 vs group 1 difference, <code>tau[2]</code> is group 3 vs group 1, and so on. This is exactly what <code>lm(y ~ factor(group))</code> returns.</p>
+</section><section id="compile-and-sample" class="level3" data-number="6.4.3"><h3 data-number="6.4.3" class="anchored" data-anchor-id="compile-and-sample">
+<span class="header-section-number">6.4.3</span> Compile and sample</h3>
+<div class="cell">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">mod_tc</span> <span class="op">&lt;-</span> <span class="fu">cmdstan_model</span><span class="op">(</span><span class="st">"stan/anova_treatment.stan"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">stan_data_anova</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span></span>
+<span>  N <span class="op">=</span> <span class="va">N</span>,</span>
+<span>  K <span class="op">=</span> <span class="va">K</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">group</span>,</span>
+<span>  y <span class="op">=</span> <span class="va">y</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_path_tc</span> <span class="op">&lt;-</span> <span class="st">"anova_treatment_fit.rds"</span></span>
+<span></span>
+<span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/files.html">file.exists</a></span><span class="op">(</span><span class="va">fit_path_tc</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_tc</span> <span class="op">&lt;-</span> <span class="va">mod_tc</span><span class="op">$</span><span class="fu">sample</span><span class="op">(</span></span>
+<span>    data <span class="op">=</span> <span class="va">stan_data_anova</span>,</span>
+<span>    seed <span class="op">=</span> <span class="fl">2025</span>,</span>
+<span>    chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    parallel_chains <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>    iter_warmup <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    iter_sampling <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    refresh <span class="op">=</span> <span class="fl">0</span></span>
+<span>  <span class="op">)</span></span>
+<span>  <span class="va">fit_tc</span><span class="op">$</span><span class="fu">save_object</span><span class="op">(</span><span class="va">fit_path_tc</span><span class="op">)</span></span>
+<span><span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>  <span class="va">fit_tc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html">readRDS</a></span><span class="op">(</span><span class="va">fit_path_tc</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section><section id="convergence-and-summary" class="level3" data-number="6.4.4"><h3 data-number="6.4.4" class="anchored" data-anchor-id="convergence-and-summary">
+<span class="header-section-number">6.4.4</span> Convergence and summary</h3>
+<div class="cell">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_tc</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"tau[1]"</span>, <span class="st">"tau[2]"</span>,</span>
+<span>                              <span class="st">"tau[3]"</span>, <span class="st">"sigma"</span>,</span>
+<span>                              <span class="st">"mu[1]"</span>, <span class="st">"mu[2]"</span>, <span class="st">"mu[3]"</span>, <span class="st">"mu[4]"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 9 × 10
+#&gt;   variable  mean median    sd   mad     q5   q95  rhat ess_bulk ess_tail
+#&gt;   &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+#&gt; 1 alpha    18.7   18.7  0.846 0.813  17.3  20.1  1.00     1189.    1650.
+#&gt; 2 tau[1]   -3.53  -3.55 1.11  1.11   -5.34 -1.70 1.00     1448.    2099.
+#&gt; 3 tau[2]   -7.74  -7.74 1.09  1.08   -9.51 -5.93 1.00     1413.    2056.
+#&gt; 4 tau[3]   -9.05  -9.06 1.16  1.12  -10.9  -7.13 1.00     1361.    2077.
+#&gt; 5 sigma     2.77   2.74 0.289 0.280   2.34  3.28 1.00     2240.    2414.
+#&gt; 6 mu[1]    18.7   18.7  0.846 0.813  17.3  20.1  1.00     1189.    1650.
+#&gt; 7 mu[2]    15.2   15.2  0.721 0.705  14.0  16.4  1.000    4505.    3213.
+#&gt; 8 mu[3]    11.0   11.0  0.724 0.700   9.76 12.1  1.000    4656.    3296.
+#&gt; 9 mu[4]     9.66   9.67 0.807 0.801   8.34 11.0  1.00     4344.    2981.</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu">mcmc_trace</span><span class="op">(</span></span>
+<span>  <span class="va">fit_tc</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"alpha"</span>, <span class="st">"tau[1]"</span>, <span class="st">"tau[2]"</span>, <span class="st">"tau[3]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Trace plots: treatment coding"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-trace-tc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-trace-tc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-one-way-anova_files/figure-html/fig-trace-tc-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trace-tc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: Trace plots for the treatment-coded ANOVA. All chains mix well. The tau parameters are treatment contrasts vs the reference group (natural forest); mu parameters are the derived group means.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-sumtozero" class="level2" data-number="6.5"><h2 data-number="6.5" class="anchored" data-anchor-id="sec-sumtozero">
+<span class="header-section-number">6.5</span> Parameterisation 2: sum-to-zero coding</h2>
+<section id="why-sum-to-zero" class="level3" data-number="6.5.1"><h3 data-number="6.5.1" class="anchored" data-anchor-id="why-sum-to-zero">
+<span class="header-section-number">6.5.1</span> Why sum-to-zero?</h3>
+<p>Treatment coding makes group 1 special, all other effects are relative to it. The choice of reference group affects the values (and priors) of every <code>tau</code> parameter, which can be awkward when no group is a natural reference.</p>
+<p>Sum-to-zero coding centres all effects around the grand mean <span class="math inline">\(\mu\)</span>:</p>
+<p><span class="math display">\[
+y_i \sim \text{Normal}(\mu + \tau_{g(i)},\; \sigma),
+\qquad \sum_{k=1}^K \tau_k = 0
+\]</span></p>
+<p>Now <span class="math inline">\(\mu\)</span> is the grand (unweighted) mean and <span class="math inline">\(\tau_k\)</span> is the deviation of group <span class="math inline">\(k\)</span> from it. The constraint <span class="math inline">\(\sum \tau_k = 0\)</span> is imposed by deriving the last effect: <span class="math inline">\(\tau_K = -\sum_{k=1}^{K-1} \tau_k\)</span>.</p>
+</section><section id="the-stan-model-1" class="level3" data-number="6.5.2"><h3 data-number="6.5.2" class="anchored" data-anchor-id="the-stan-model-1">
+<span class="header-section-number">6.5.2</span> The Stan model</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N;</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">2</span>&gt; K;</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=K&gt; group;</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y;</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> mu;              <span class="co">// grand mean</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K<span class="dv">-1</span>] tau_raw;  <span class="co">// free effects for groups 1..K-1</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[K] tau;</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  tau[<span class="dv">1</span>:(K<span class="dv">-1</span>)] = tau_raw;</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  tau[K] = -sum(tau_raw);   <span class="co">// sum-to-zero constraint</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  mu ~ normal(<span class="dv">0</span>, <span class="dv">10</span>);</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  tau_raw ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    y[i] ~ normal(mu + tau[group[i]], sigma);</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] y_rep;</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] log_lik;</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    y_rep[i] = normal_rng(mu + tau[group[i]], sigma);</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    log_lik[i] = normal_lpdf(y[i] | mu + tau[group[i]], sigma);</span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-simple callout-tip">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Implementing the sum-to-zero constraint.</strong><br>
+Stan cannot impose <code>sum(tau) == 0</code> as a hard constraint in the <code>parameters</code> block — that would reduce the parameter space dimension. Instead, we declare <code>K-1</code> free parameters (<code>tau_raw</code>) and derive the <span class="math inline">\(K\)</span>-th in <code>transformed parameters</code> as <code>tau[K] = -sum(tau_raw)</code>. Stan samples freely in the <span class="math inline">\((K-1)\)</span>-dimensional unconstrained space and the constraint holds exactly for every draw. This is the standard Stan idiom for sum-to-zero constraints.</p>
+</div>
+</div>
+</div>
+</section><section id="compile-and-sample-1" class="level3" data-number="6.5.3"><h3 data-number="6.5.3" class="anchored" data-anchor-id="compile-and-sample-1">
+<span class="header-section-number">6.5.3</span> Compile and sample</h3>
+<div class="cell">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">fit_sz</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span>variables <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mu"</span>, <span class="st">"tau[1]"</span>, <span class="st">"tau[2]"</span>,</span>
+<span>                              <span class="st">"tau[3]"</span>, <span class="st">"tau[4]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 6 × 10
+#&gt;   variable  mean median    sd   mad     q5   q95  rhat ess_bulk ess_tail
+#&gt;   &lt;chr&gt;    &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+#&gt; 1 mu       13.7   13.7  0.393 0.394 13.0   14.3  1.00     4698.    3111.
+#&gt; 2 tau[1]    5.64   5.65 0.731 0.728  4.45   6.84 1.000    3682.    2803.
+#&gt; 3 tau[2]    1.42   1.42 0.648 0.659  0.342  2.46 1.00     3324.    2934.
+#&gt; 4 tau[3]   -2.80  -2.82 0.647 0.635 -3.85  -1.73 1.00     3959.    3276.
+#&gt; 5 tau[4]   -4.26  -4.25 0.693 0.682 -5.41  -3.13 1.00     5228.    2776.
+#&gt; 6 sigma     2.75   2.72 0.292 0.293  2.31   3.25 1.00     4174.    3016.</code></pre>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Both models give identical group means.</strong><br>
+Treatment coding: group mean <span class="math inline">\(k\)</span> = <code>alpha + tau[k-1]</code>. Sum-to-zero coding: group mean <span class="math inline">\(k\)</span> = <code>mu + tau[k]</code>. The two parameterisations are mathematically equivalent, they differ only in what the named parameters represent, not in what the model predicts. Verify this by comparing <code>mu[k]</code> from the treatment model with <code>mu + tau[k]</code> from the sum-to-zero model: they should match to numerical precision.</p>
+</div>
+</div>
+</div>
+</section></section><section id="sec-contrasts" class="level2" data-number="6.6"><h2 data-number="6.6" class="anchored" data-anchor-id="sec-contrasts">
+<span class="header-section-number">6.6</span> Group means and pairwise comparisons</h2>
+<section id="posterior-group-means" class="level3" data-number="6.6.1"><h3 data-number="6.6.1" class="anchored" data-anchor-id="posterior-group-means">
+<span class="header-section-number">6.6.1</span> Posterior group means</h3>
+<p>Whether you used treatment or sum-to-zero coding, the group means <code>mu[k]</code> are the quantities of primary scientific interest.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb12"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">draws_tc</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span><span class="va">fit_tc</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mu[1]"</span>, <span class="st">"mu[2]"</span>,</span>
+<span>                                        <span class="st">"mu[3]"</span>, <span class="st">"mu[4]"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">draws_tc</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">group_names</span></span>
+<span></span>
+<span><span class="va">mu_long</span> <span class="op">&lt;-</span> <span class="va">draws_tc</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="fu">all_of</span><span class="op">(</span><span class="va">group_names</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">pivot_longer</span><span class="op">(</span><span class="fu">everything</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>               names_to  <span class="op">=</span> <span class="st">"group"</span>,</span>
+<span>               values_to <span class="op">=</span> <span class="st">"value"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">group</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span></span>
+<span>    median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>,</span>
+<span>    lo50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.25</span><span class="op">)</span>,</span>
+<span>    hi50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>    lo90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.05</span><span class="op">)</span>,</span>
+<span>    hi90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span>    group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">group</span>, levels <span class="op">=</span> <span class="va">group_names</span><span class="op">)</span>,</span>
+<span>    true_val <span class="op">=</span> <span class="va">true_mu</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">]</span></span>
+<span>  <span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ggplot</span><span class="op">(</span><span class="va">mu_long</span>, <span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">group</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo90</span>, xend <span class="op">=</span> <span class="va">hi90</span>, yend <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo50</span>, xend <span class="op">=</span> <span class="va">hi50</span>, yend <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span><span class="op">)</span>, colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">true_val</span><span class="op">)</span>, colour <span class="op">=</span> <span class="st">"#c0392b"</span>,</span>
+<span>             shape <span class="op">=</span> <span class="fl">4</span>, size <span class="op">=</span> <span class="fl">3</span>, stroke <span class="op">=</span> <span class="fl">1.2</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Topsoil SOC (g kg⁻¹)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior group means"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Median, 50% CI (thick), 90% CI (thin), ✕ true value"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-group-means" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-group-means-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-one-way-anova_files/figure-html/fig-group-means-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-group-means-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: Posterior distributions of group means (SOC, g kg⁻¹) for the four land use types. Points are posterior medians; thick bars are 50% credible intervals; thin bars are 90% credible intervals. Red crosses mark the true data-generating means. The natural forest mean is estimated most precisely despite the smallest sample (n = 10), because its SOC values are more tightly clustered.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="pairwise-contrasts" class="level3" data-number="6.6.2"><h3 data-number="6.6.2" class="anchored" data-anchor-id="pairwise-contrasts">
+<span class="header-section-number">6.6.2</span> Pairwise contrasts</h3>
+<p>Classical ANOVA follows up a significant <span class="math inline">\(F\)</span>-test with post-hoc tests (Tukey HSD, Bonferroni). In Stan, pairwise contrasts are just arithmetic on the posterior draws, no adjustment for multiple comparisons is needed because we are estimating probabilities, not controlling Type I error rates.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb13"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">draws_mu</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span><span class="va">fit_tc</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mu[1]"</span>, <span class="st">"mu[2]"</span>,</span>
+<span>                                        <span class="st">"mu[3]"</span>, <span class="st">"mu[4]"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span><span class="op">(</span><span class="va">draws_mu</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">group_names</span></span>
+<span></span>
+<span><span class="co"># All pairwise differences</span></span>
+<span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/combn.html">combn</a></span><span class="op">(</span><span class="va">group_names</span>, <span class="fl">2</span>, simplify <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">contrast_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">pairs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">diff</span> <span class="op">&lt;-</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="va">p</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="va">p</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">p</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"-"</span>, <span class="va">p</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">diff</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    lo90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">diff</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    hi90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">diff</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>    p_positive <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">diff</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">contrast_df</span>,</span>
+<span>  col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Contrast"</span>, <span class="st">"Mean diff."</span>, <span class="st">"5%"</span>, <span class="st">"95%"</span>,</span>
+<span>                <span class="st">"P(diff &gt; 0 | data)"</span><span class="op">)</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Posterior pairwise SOC differences (g kg⁻¹). The last</span></span>
+<span><span class="st">               column is the posterior probability that the first group</span></span>
+<span><span class="st">               has higher SOC than the second."</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Posterior pairwise SOC differences (g kg⁻¹). The last column is the posterior probability that the first group has higher SOC than the second.</caption>
+<colgroup>
+<col style="width: 5%">
+<col style="width: 35%">
+<col style="width: 13%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 30%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Contrast</th>
+<th style="text-align: right;">Mean diff.</th>
+<th style="text-align: right;">5%</th>
+<th style="text-align: right;">95%</th>
+<th style="text-align: right;">P(diff &gt; 0 | data)</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">5%</td>
+<td style="text-align: left;">Natural forest - Agroforest</td>
+<td style="text-align: right;">3.53</td>
+<td style="text-align: right;">1.70</td>
+<td style="text-align: right;">5.34</td>
+<td style="text-align: right;">0.998</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5%1</td>
+<td style="text-align: left;">Natural forest - Fallow</td>
+<td style="text-align: right;">7.74</td>
+<td style="text-align: right;">5.93</td>
+<td style="text-align: right;">9.51</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5%2</td>
+<td style="text-align: left;">Natural forest - Cropland</td>
+<td style="text-align: right;">9.05</td>
+<td style="text-align: right;">7.13</td>
+<td style="text-align: right;">10.92</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5%3</td>
+<td style="text-align: left;">Agroforest - Fallow</td>
+<td style="text-align: right;">4.21</td>
+<td style="text-align: right;">2.56</td>
+<td style="text-align: right;">5.90</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5%4</td>
+<td style="text-align: left;">Agroforest - Cropland</td>
+<td style="text-align: right;">5.52</td>
+<td style="text-align: right;">3.75</td>
+<td style="text-align: right;">7.25</td>
+<td style="text-align: right;">1.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5%5</td>
+<td style="text-align: left;">Fallow - Cropland</td>
+<td style="text-align: right;">1.31</td>
+<td style="text-align: right;">-0.48</td>
+<td style="text-align: right;">3.15</td>
+<td style="text-align: right;">0.880</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb14"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">contrast_draws</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="va">pairs</span>, <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">diff</span> <span class="op">&lt;-</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="va">p</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">]</span> <span class="op">-</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="va">p</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>    contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span><span class="op">(</span><span class="va">p</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, <span class="st">"-"</span>, <span class="va">p</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span>,</span>
+<span>    value <span class="op">=</span> <span class="va">diff</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">contrast_draws</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">group_by</span><span class="op">(</span><span class="va">contrast</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">summarise</span><span class="op">(</span></span>
+<span>    median <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/median.html">median</a></span><span class="op">(</span><span class="va">value</span><span class="op">)</span>,</span>
+<span>    lo90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.05</span><span class="op">)</span>,</span>
+<span>    hi90 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>    lo50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.25</span><span class="op">)</span>,</span>
+<span>    hi50 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">value</span>, <span class="fl">0.75</span><span class="op">)</span>,</span>
+<span>    .groups <span class="op">=</span> <span class="st">"drop"</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">mutate</span><span class="op">(</span></span>
+<span>    contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/reorder.factor.html">reorder</a></span><span class="op">(</span><span class="va">contrast</span>, <span class="va">median</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">ggplot</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>y <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_vline</span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">0</span>, linetype <span class="op">=</span> <span class="st">"dashed"</span>,</span>
+<span>             colour <span class="op">=</span> <span class="st">"grey50"</span>, linewidth <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo90</span>, xend <span class="op">=</span> <span class="va">hi90</span>, yend <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_segment</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">lo50</span>, xend <span class="op">=</span> <span class="va">hi50</span>, yend <span class="op">=</span> <span class="va">contrast</span><span class="op">)</span>,</span>
+<span>               colour <span class="op">=</span> <span class="st">"#2e7d6a"</span>, linewidth <span class="op">=</span> <span class="fl">2.5</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_point</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">median</span><span class="op">)</span>, colour <span class="op">=</span> <span class="st">"#1a4a40"</span>, size <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="st">"Difference in SOC (g kg⁻¹)"</span>,</span>
+<span>    y <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior pairwise contrasts"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Median, 50% CI (thick), 90% CI (thin)"</span></span>
+<span>  <span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-contrasts" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-contrasts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-one-way-anova_files/figure-html/fig-contrasts-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-contrasts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: Posterior distributions of all six pairwise SOC differences. Intervals that exclude zero (vertical dashed line) indicate clear directional evidence. The natural forest vs cropland contrast shows the strongest and most certain difference.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section></section><section id="sec-anova-table" class="level2" data-number="6.7"><h2 data-number="6.7" class="anchored" data-anchor-id="sec-anova-table">
+<span class="header-section-number">6.7</span> Connecting to the classical ANOVA table</h2>
+<p>Students expect to see an ANOVA table with <span class="math inline">\(SS\)</span>, <span class="math inline">\(df\)</span>, <span class="math inline">\(MS\)</span>, and the <span class="math inline">\(F\)</span>-statistic. We can reconstruct these from the posterior, but more importantly we can explain <em>what they actually measure</em>, and why the Bayesian alternatives are more useful.</p>
+<section id="the-classical-table" class="level3" data-number="6.7.1"><h3 data-number="6.7.1" class="anchored" data-anchor-id="the-classical-table">
+<span class="header-section-number">6.7.1</span> The classical table</h3>
+<div class="cell">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">aov_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aov.html">aov</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">soc_df</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">aov_fit</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;               Df Sum Sq Mean Sq F value   Pr(&gt;F)    
+#&gt; factor(group)  3  698.5  232.82    30.8 4.52e-11 ***
+#&gt; Residuals     46  347.8    7.56                     
+#&gt; ---
+#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+</section><section id="posterior-r2-and-eta2" class="level3" data-number="6.7.2"><h3 data-number="6.7.2" class="anchored" data-anchor-id="posterior-r2-and-eta2">
+<span class="header-section-number">6.7.2</span> Posterior <span class="math inline">\(R^2\)</span> and <span class="math inline">\(\eta^2\)</span>
+</h3>
+<p>The classical effect size <span class="math inline">\(\eta^2 = SS_{\text{between}} / SS_{\text{total}}\)</span> measures the proportion of variance explained by group membership. We can compute a Bayesian analogue directly from the posterior.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb17"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Bayesian R²</span></span>
+<span><span class="co"># R² = Var(fitted) / (Var(fitted) + sigma²)</span></span>
+<span><span class="va">draws_all</span> <span class="op">&lt;-</span> <span class="fu">as_draws_df</span><span class="op">(</span></span>
+<span>  <span class="va">fit_tc</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"mu[1]"</span>, <span class="st">"mu[2]"</span>, <span class="st">"mu[3]"</span>, <span class="st">"mu[4]"</span>, <span class="st">"sigma"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Column names are "mu[1]"..."mu[4]" and "sigma", use them directly</span></span>
+<span><span class="va">mu_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"mu["</span>, <span class="fl">1</span><span class="op">:</span><span class="va">K</span>, <span class="st">"]"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">bayes_r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span><span class="op">(</span><span class="va">draws_all</span><span class="op">)</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">i</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Map each observation to its group mean draw</span></span>
+<span>  <span class="va">mu_obs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span><span class="op">(</span><span class="va">draws_all</span><span class="op">[</span><span class="va">i</span>, <span class="va">mu_cols</span><span class="op">]</span><span class="op">)</span><span class="op">[</span><span class="va">group</span><span class="op">]</span></span>
+<span>  <span class="va">var_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/cor.html">var</a></span><span class="op">(</span><span class="va">mu_obs</span><span class="op">)</span></span>
+<span>  <span class="va">sigma_i</span> <span class="op">&lt;-</span> <span class="va">draws_all</span><span class="op">$</span><span class="va">sigma</span><span class="op">[</span><span class="va">i</span><span class="op">]</span></span>
+<span>  <span class="va">var_fit</span> <span class="op">/</span> <span class="op">(</span><span class="va">var_fit</span> <span class="op">+</span> <span class="va">sigma_i</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Posterior mean Bayesian R²: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">bayes_r2</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Posterior mean Bayesian R²:  0.609</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb19"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"90% credible interval: ["</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">bayes_r2</span>, <span class="fl">0.05</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">","</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html">quantile</a></span><span class="op">(</span><span class="va">bayes_r2</span>, <span class="fl">0.95</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"]\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 90% credible interval: [ 0.477 , 0.717 ]</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb21"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"Classical eta²:             "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">aov_fit</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="st">"factor(group)"</span>, <span class="st">"Sum Sq"</span><span class="op">]</span> <span class="op">/</span></span>
+<span>          <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">aov_fit</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span>, <span class="st">"Sum Sq"</span><span class="op">]</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; Classical eta²:              0.668</code></pre>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p><strong>Why Bayesian <span class="math inline">\(R^2\)</span> instead of <span class="math inline">\(\eta^2\)</span>?</strong><br>
+Classical <span class="math inline">\(\eta^2\)</span> is a single number computed from point estimates. Bayesian <span class="math inline">\(R^2\)</span> <span class="citation" data-cites="gelman2019r2">(<a href="../references.html#ref-gelman2019r2" role="doc-biblioref"><strong>gelman2019r2?</strong></a>)</span> is a full posterior distribution: it tells you not just the most likely proportion of variance explained, but how uncertain that proportion is. With small samples, the credible interval for <span class="math inline">\(R^2\)</span> can be very wide, a fact <span class="math inline">\(\eta^2\)</span> conceals entirely.</p>
+</div>
+</div>
+</div>
+</section><section id="reconstructing-the-f-statistic" class="level3" data-number="6.7.3"><h3 data-number="6.7.3" class="anchored" data-anchor-id="reconstructing-the-f-statistic">
+<span class="header-section-number">6.7.3</span> Reconstructing the <span class="math inline">\(F\)</span>-statistic</h3>
+<p>The <span class="math inline">\(F\)</span>-statistic can be recovered from the posterior mean estimates, but this is rarely useful that is the posterior gives richer information directly. We show it here purely for comparison.</p>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb23"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># Posterior mean group means</span></span>
+<span><span class="va">mu_hat</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html">colMeans</a></span><span class="op">(</span><span class="va">draws_all</span><span class="op">[</span>, <span class="va">mu_cols</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">sigma_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span><span class="va">draws_all</span><span class="op">$</span><span class="va">sigma</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Between-group variance (weighted by n)</span></span>
+<span><span class="va">grand_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/weighted.mean.html">weighted.mean</a></span><span class="op">(</span><span class="va">mu_hat</span>, <span class="va">n_per_group</span><span class="op">)</span></span>
+<span><span class="va">ss_between</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">n_per_group</span> <span class="op">*</span> <span class="op">(</span><span class="va">mu_hat</span> <span class="op">-</span> <span class="va">grand_hat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">ms_between</span> <span class="op">&lt;-</span> <span class="va">ss_between</span> <span class="op">/</span> <span class="op">(</span><span class="va">K</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">ms_within</span>  <span class="op">&lt;-</span> <span class="va">sigma_hat</span><span class="op">^</span><span class="fl">2</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"F from posterior means:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">ms_between</span> <span class="op">/</span> <span class="va">ms_within</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; F from posterior means:   25.06</code></pre>
+</div>
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb25"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/cat.html">cat</a></span><span class="op">(</span><span class="st">"F from classical ANOVA:  "</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span><span class="op">(</span><span class="va">aov_fit</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">[</span><span class="st">"factor(group)"</span>, <span class="st">"F value"</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output cell-output-stdout">
+<pre><code>#&gt; F from classical ANOVA:   30.8</code></pre>
+</div>
+</div>
+</section></section><section id="posterior-predictive-check" class="level2" data-number="6.8"><h2 data-number="6.8" class="anchored" data-anchor-id="posterior-predictive-check">
+<span class="header-section-number">6.8</span> Posterior predictive check</h2>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb27"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="va">y_rep_tc</span> <span class="op">&lt;-</span> <span class="fu">as_draws_matrix</span><span class="op">(</span><span class="va">fit_tc</span><span class="op">$</span><span class="fu">draws</span><span class="op">(</span><span class="st">"y_rep"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">ppc_dens_overlay_grouped</span><span class="op">(</span></span>
+<span>  y <span class="op">=</span> <span class="va">y</span>,</span>
+<span>  yrep <span class="op">=</span> <span class="va">y_rep_tc</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">50</span>, <span class="op">]</span>,</span>
+<span>  group <span class="op">=</span> <span class="va">soc_df</span><span class="op">$</span><span class="va">group_name</span></span>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">labs</span><span class="op">(</span></span>
+<span>    title <span class="op">=</span> <span class="st">"Posterior predictive check by land use type"</span>,</span>
+<span>    subtitle <span class="op">=</span> <span class="st">"Dark: observed. Light: 50 posterior predictive datasets"</span></span>
+<span>  <span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">theme</span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<div id="fig-ppc-ch06" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure"><div aria-describedby="fig-ppc-ch06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="06-one-way-anova_files/figure-html/fig-ppc-ch06-1.png" class="img-fluid figure-img" style="width:95.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ppc-ch06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: Posterior predictive check for the treatment-coded ANOVA. Observed SOC distributions per group (dark lines) are well covered by the 50 replicated datasets (light lines). The wider spread for natural forest (smallest n) is correctly captured by the model.
+</figcaption></figure>
+</div>
+</div>
+</div>
+</section><section id="comparison-with-aov-and-lm" class="level2" data-number="6.9"><h2 data-number="6.9" class="anchored" data-anchor-id="comparison-with-aov-and-lm">
+<span class="header-section-number">6.9</span> Comparison with <code>aov()</code> and <code>lm()</code>
+</h2>
+<div class="cell">
+<details class="code-fold"><summary>Code</summary><div class="sourceCode" id="cb28"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># lm() with treatment coding (same parameterisation as Stan model 1)</span></span>
+<span><span class="va">lm_tc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html">lm</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">soc_df</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Stan posterior means for group means</span></span>
+<span><span class="va">stan_mu</span> <span class="op">&lt;-</span> <span class="va">fit_tc</span><span class="op">$</span><span class="fu">summary</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span><span class="op">(</span><span class="st">"mu["</span>, <span class="fl">1</span><span class="op">:</span><span class="va">K</span>, <span class="st">"]"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">variable</span>, <span class="va">mean</span>, <span class="va">q5</span>, <span class="va">q95</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># lm() group means (alpha + tau)</span></span>
+<span><span class="va">lm_mu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_tc</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_tc</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html">coef</a></span><span class="op">(</span><span class="va">lm_tc</span><span class="op">)</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span><span class="op">]</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">lm_ci</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html">predict</a></span><span class="op">(</span><span class="va">lm_tc</span>,</span>
+<span>                  newdata <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html">factor</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">K</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                  interval <span class="op">=</span> <span class="st">"confidence"</span>, level <span class="op">=</span> <span class="fl">0.90</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">comparison</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span></span>
+<span>  group <span class="op">=</span> <span class="va">group_names</span>,</span>
+<span>  stan_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">stan_mu</span><span class="op">$</span><span class="va">mean</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  stan_lo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">stan_mu</span><span class="op">$</span><span class="va">q5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  stan_hi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">stan_mu</span><span class="op">$</span><span class="va">q95</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  lm_mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">lm_mu</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  lm_lo <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">lm_ci</span><span class="op">[</span>, <span class="st">"lwr"</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  lm_hi <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html">round</a></span><span class="op">(</span><span class="va">lm_ci</span><span class="op">[</span>, <span class="st">"upr"</span><span class="op">]</span>, <span class="fl">2</span><span class="op">)</span>,</span>
+<span>  true <span class="op">=</span> <span class="va">true_mu</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span><span class="op">(</span></span>
+<span>  <span class="va">comparison</span>,</span>
+<span>  col.names <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"Group"</span>, <span class="st">"Bayes mean"</span>, <span class="st">"Bayes 5%"</span>, <span class="st">"Bayes 95%"</span>,</span>
+<span>                <span class="st">"OLS mean"</span>, <span class="st">"OLS 5%"</span>, <span class="st">"OLS 95%"</span>, <span class="st">"True"</span><span class="op">)</span>,</span>
+<span>  caption <span class="op">=</span> <span class="st">"Posterior group means vs OLS estimates. Values are</span></span>
+<span><span class="st">               nearly identical with weakly informative priors</span></span>
+<span><span class="st">               and n ≥ 10 per group."</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details><div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Posterior group means vs OLS estimates. Values are nearly identical with weakly informative priors and n ≥ 10 per group.</caption>
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 12%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 5%">
+</colgroup>
+<thead><tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: left;">Group</th>
+<th style="text-align: right;">Bayes mean</th>
+<th style="text-align: right;">Bayes 5%</th>
+<th style="text-align: right;">Bayes 95%</th>
+<th style="text-align: right;">OLS mean</th>
+<th style="text-align: right;">OLS 5%</th>
+<th style="text-align: right;">OLS 95%</th>
+<th style="text-align: right;">True</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: left;">Natural forest</td>
+<td style="text-align: right;">18.71</td>
+<td style="text-align: right;">17.30</td>
+<td style="text-align: right;">20.06</td>
+<td style="text-align: right;">19.50</td>
+<td style="text-align: right;">18.04</td>
+<td style="text-align: right;">20.96</td>
+<td style="text-align: right;">18.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor(group)2</td>
+<td style="text-align: left;">Agroforest</td>
+<td style="text-align: right;">15.18</td>
+<td style="text-align: right;">13.98</td>
+<td style="text-align: right;">16.37</td>
+<td style="text-align: right;">15.11</td>
+<td style="text-align: right;">13.88</td>
+<td style="text-align: right;">16.35</td>
+<td style="text-align: right;">14.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">factor(group)3</td>
+<td style="text-align: left;">Fallow</td>
+<td style="text-align: right;">10.97</td>
+<td style="text-align: right;">9.76</td>
+<td style="text-align: right;">12.14</td>
+<td style="text-align: right;">10.81</td>
+<td style="text-align: right;">9.58</td>
+<td style="text-align: right;">12.05</td>
+<td style="text-align: right;">11.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor(group)4</td>
+<td style="text-align: left;">Cropland</td>
+<td style="text-align: right;">9.66</td>
+<td style="text-align: right;">8.34</td>
+<td style="text-align: right;">10.98</td>
+<td style="text-align: right;">9.41</td>
+<td style="text-align: right;">8.07</td>
+<td style="text-align: right;">10.74</td>
+<td style="text-align: right;">8.4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section><section id="summary" class="level2" data-number="6.10"><h2 data-number="6.10" class="anchored" data-anchor-id="summary">
+<span class="header-section-number">6.10</span> Summary</h2>
+<ul>
+<li>One-way ANOVA is linear regression with a categorical predictor. In Stan, the two natural parameterisations are <strong>treatment coding</strong> (effects relative to a reference group) and <strong>sum-to-zero coding</strong> (effects relative to the grand mean). Both give identical group means and fits.</li>
+<li>Treatment coding uses <code>real alpha</code> and <code>vector[K-1] tau</code>; the full group mean vector is assembled in <code>transformed parameters</code>. Sum-to-zero coding uses <code>real mu</code> and <code>vector[K-1] tau_raw</code>, deriving the last effect as <code>tau[K] = -sum(tau_raw)</code>.</li>
+<li>
+<strong>Pairwise contrasts</strong> are arithmetic on posterior draws, no multiplicity adjustment is required, and the result is a full posterior distribution for each difference, not just a <span class="math inline">\(p\)</span>-value.</li>
+<li>Bayesian <span class="math inline">\(R^2\)</span> generalises <span class="math inline">\(\eta^2\)</span> to a posterior distribution that honestly represents uncertainty about the proportion of variance explained.</li>
+<li>Unbalanced designs are handled transparently by the likelihood; no special treatment is required.</li>
+<li>The <code>ppc_dens_overlay_grouped()</code> function from <code>bayesplot</code> provides a group-specific predictive check, more informative than the marginal overlay used in earlier chapters.</li>
+</ul></section><section id="exercises" class="level2" data-number="6.11"><h2 data-number="6.11" class="anchored" data-anchor-id="exercises">
+<span class="header-section-number">6.11</span> Exercises</h2>
 <ol type="1">
-<li>Exercise 1</li>
-<li>Exercise 2</li>
-</ol></section><section id="summary" class="level2" data-number="6.5"><h2 data-number="6.5" class="anchored" data-anchor-id="summary">
-<span class="header-section-number">6.5</span> Summary</h2>
-<p><em>Summary to be written.</em></p>
+<li><p><strong>Change the reference group.</strong> Refit the treatment-coded model setting cropland (group 4) as the reference. How do <code>alpha</code> and the <code>tau</code> values change? Do the group means <code>mu[k]</code> change? Why or why not?</p></li>
+<li><p><strong>Verify the equivalence.</strong> Using posterior draws from both the treatment-coded and sum-to-zero models, compute the group means implied by each (<code>alpha + tau[k-1]</code> vs <code>mu + tau[k]</code>). Show that they match to numerical precision using <code><a href="https://rdrr.io/r/base/all.equal.html">all.equal()</a></code>.</p></li>
+<li>
+<p><strong>Ordered contrasts.</strong> Ecologists often expect a monotone gradient: forest &gt; agroforest &gt; fallow &gt; cropland. Using the pairwise contrast draws, compute the posterior probability that <em>all three</em> adjacent pairs are in the expected direction simultaneously:</p>
+<div class="cell">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html">mean</a></span><span class="op">(</span></span>
+<span>  <span class="op">(</span><span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Natural forest"</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Agroforest"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>  <span class="op">(</span><span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Agroforest"</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Fallow"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span> <span class="op">&amp;</span></span>
+<span>  <span class="op">(</span><span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Fallow"</span><span class="op">]</span><span class="op">]</span> <span class="op">&gt;</span> <span class="va">draws_mu</span><span class="op">[[</span><span class="st">"Cropland"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>What is this probability? Is it larger or smaller than you expected?</p>
+</li>
+<li><p><strong>Heteroscedastic ANOVA.</strong> The homoscedastic assumption (common <span class="math inline">\(\sigma\)</span> across groups) can be relaxed. Modify the treatment-coded Stan model to estimate a separate <code>sigma[k]</code> for each group: replace <code>real&lt;lower=0&gt; sigma</code> with <code>vector&lt;lower=0&gt;[K] sigma</code> and update the likelihood to <code>normal(mu[group[i]], sigma[group[i]])</code>. Refit and compare LOO scores. Is the heteroscedastic model preferred?</p></li>
+<li><p><strong>Sample size sensitivity.</strong> Rerun the simulation with <code>n_per_group &lt;- c(3, 4, 4, 3)</code> (very small groups). How do the posterior group means compare to the OLS means? Where does the Bayesian approach benefit most from the prior?</p></li>
+</ol></section><section id="further-reading" class="level2" data-number="6.12"><h2 data-number="6.12" class="anchored" data-anchor-id="further-reading">
+<span class="header-section-number">6.12</span> Further reading</h2>
+<ul>
+<li>
+<span class="citation" data-cites="gelman2020regression">Gelman, Hill, and Vehtari (<a href="../references.html#ref-gelman2020regression" role="doc-biblioref">2020</a>, Ch. 16)</span>: ANOVA from a regression perspective, with a thorough treatment of parameterisation choices.</li>
+<li>
+<span class="citation" data-cites="mcelreath2020rethinking">McElreath (<a href="../references.html#ref-mcelreath2020rethinking" role="doc-biblioref">2020</a>, Ch. 5)</span>: categorical predictors and contrasts built from posterior draws, with the DAG perspective on group structure.</li>
+<li>
+<span class="citation" data-cites="gelman2013bda">Gelman et al. (<a href="../references.html#ref-gelman2013bda" role="doc-biblioref">2013</a>, Ch. 15)</span>: hierarchical ANOVA as a Bayesian model; previews the partial-pooling approach of Chapter 8.</li>
+<li>
+<span class="citation" data-cites="gelman2019r2">(<a href="../references.html#ref-gelman2019r2" role="doc-biblioref"><strong>gelman2019r2?</strong></a>)</span>: the reference for Bayesian <span class="math inline">\(R^2\)</span> as a posterior distribution rather than a point estimate.</li>
+<li>Stan User’s Guide, “ANOVA Models”: <a href="https://mc-stan.org/docs/stan-users-guide/regression.html" class="uri">https://mc-stan.org/docs/stan-users-guide/regression.html</a>
+</li>
+</ul>
 
 
-<!-- -->
-
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-gelman2013bda" class="csl-entry" role="listitem">
+Gelman, Andrew, John B Carlin, Hal S Stern, David B Dunson, Aki Vehtari, and Donald B Rubin. 2013. <em>Bayesian Data Analysis</em>. 3rd ed. Boca Raton, FL: CRC Press.
+</div>
+<div id="ref-gelman2020regression" class="csl-entry" role="listitem">
+Gelman, Andrew, Jennifer Hill, and Aki Vehtari. 2020. <em>Regression and Other Stories</em>. Cambridge, UK: Cambridge University Press.
+</div>
+<div id="ref-mcelreath2020rethinking" class="csl-entry" role="listitem">
+McElreath, Richard. 2020. <em>Statistical Rethinking: A <span>Bayesian</span> Course with Examples in <span>R</span> and <span>Stan</span></em>. 2nd ed. Boca Raton, FL: CRC Press.
+</div>
+</div>
 </section></main><!-- /main --><script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -424,150 +1268,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
-  const disableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'prefetch';
-    }
-  }
-  const enableStylesheet = (stylesheets) => {
-    for (let i=0; i < stylesheets.length; i++) {
-      const stylesheet = stylesheets[i];
-      stylesheet.rel = 'stylesheet';
-    }
-  }
-  const manageTransitions = (selector, allowTransitions) => {
-    const els = window.document.querySelectorAll(selector);
-    for (let i=0; i < els.length; i++) {
-      const el = els[i];
-      if (allowTransitions) {
-        el.classList.remove('notransition');
-      } else {
-        el.classList.add('notransition');
-      }
-    }
-  }
-  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
-    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
-    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
-    let newTheme = '';
-    if(darkModeDefault) {
-      newTheme = isAlternate ? baseTheme : alternateTheme;
-    } else {
-      newTheme = isAlternate ? alternateTheme : baseTheme;
-    }
-    const changeGiscusTheme = () => {
-      // From: https://github.com/giscus/giscus/issues/336
-      const sendMessage = (message) => {
-        const iframe = document.querySelector('iframe.giscus-frame');
-        if (!iframe) return;
-        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
-      }
-      sendMessage({
-        setConfig: {
-          theme: newTheme
-        }
-      });
-    }
-    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
-    if (isGiscussLoaded) {
-      changeGiscusTheme();
-    }
-  }
-  const toggleColorMode = (alternate) => {
-    // Switch the stylesheets
-    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
-    manageTransitions('#quarto-margin-sidebar .nav-link', false);
-    if (alternate) {
-      enableStylesheet(alternateStylesheets);
-      for (const sheetNode of alternateStylesheets) {
-        if (sheetNode.id === "quarto-bootstrap") {
-          toggleBodyColorMode(sheetNode);
-        }
-      }
-    } else {
-      disableStylesheet(alternateStylesheets);
-      toggleBodyColorPrimary();
-    }
-    manageTransitions('#quarto-margin-sidebar .nav-link', true);
-    // Switch the toggles
-    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
-    for (let i=0; i < toggles.length; i++) {
-      const toggle = toggles[i];
-      if (toggle) {
-        if (alternate) {
-          toggle.classList.add("alternate");     
-        } else {
-          toggle.classList.remove("alternate");
-        }
-      }
-    }
-    // Hack to workaround the fact that safari doesn't
-    // properly recolor the scrollbar when toggling (#1455)
-    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
-      manageTransitions("body", false);
-      window.scrollTo(0, 1);
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-        manageTransitions("body", true);
-      }, 40);  
-    }
-  }
-  const isFileUrl = () => { 
-    return window.location.protocol === 'file:';
-  }
-  const hasAlternateSentinel = () => {  
-    let styleSentinel = getColorSchemeSentinel();
-    if (styleSentinel !== null) {
-      return styleSentinel === "alternate";
-    } else {
-      return false;
-    }
-  }
-  const setStyleSentinel = (alternate) => {
-    const value = alternate ? "alternate" : "default";
-    if (!isFileUrl()) {
-      window.localStorage.setItem("quarto-color-scheme", value);
-    } else {
-      localAlternateSentinel = value;
-    }
-  }
-  const getColorSchemeSentinel = () => {
-    if (!isFileUrl()) {
-      const storageValue = window.localStorage.getItem("quarto-color-scheme");
-      return storageValue != null ? storageValue : localAlternateSentinel;
-    } else {
-      return localAlternateSentinel;
-    }
-  }
-  const darkModeDefault = false;
-  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
-  // Dark / light mode switch
-  window.quartoToggleColorScheme = () => {
-    // Read the current dark / light value 
-    let toAlternate = !hasAlternateSentinel();
-    toggleColorMode(toAlternate);
-    setStyleSentinel(toAlternate);
-    toggleGiscusIfUsed(toAlternate, darkModeDefault);
-  };
-  // Ensure there is a toggle, if there isn't float one in the top right
-  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-    const a = window.document.createElement('a');
-    a.classList.add('top-right');
-    a.classList.add('quarto-color-scheme-toggle');
-    a.href = "";
-    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
-    const i = window.document.createElement("i");
-    i.classList.add('bi');
-    a.appendChild(i);
-    window.document.body.appendChild(a);
-  }
-  // Switch to dark mode if need be
-  if (hasAlternateSentinel()) {
-    toggleColorMode(true);
-  } else {
-    toggleColorMode(false);
-  }
   const icon = "";
   const anchorJS = new window.AnchorJS();
   anchorJS.options = {
@@ -638,60 +1338,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     });
     clipboardModal.on('success', onCopySuccess);
   }
-  const viewSource = window.document.getElementById('quarto-view-source') ||
-                     window.document.getElementById('quarto-code-tools-source');
-  if (viewSource) {
-    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-    viewSource.addEventListener("click", function(e) {
-      if (sourceUrl) {
-        // rstudio viewer pane
-        if (/\bcapabilities=\b/.test(window.location)) {
-          window.open(sourceUrl);
-        } else {
-          window.location.href = sourceUrl;
-        }
-      } else {
-        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-        modal.show();
-      }
-      return false;
-    });
-  }
-  function toggleCodeHandler(show) {
-    return function(e) {
-      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-      for (let i=0; i<detailsSrc.length; i++) {
-        const details = detailsSrc[i].parentElement;
-        if (show) {
-          details.open = true;
-        } else {
-          details.removeAttribute("open");
-        }
-      }
-      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-      const fromCls = show ? "hidden" : "unhidden";
-      const toCls = show ? "unhidden" : "hidden";
-      for (let i=0; i<cellCodeDivs.length; i++) {
-        const codeDiv = cellCodeDivs[i];
-        if (codeDiv.classList.contains(fromCls)) {
-          codeDiv.classList.remove(fromCls);
-          codeDiv.classList.add(toCls);
-        } 
-      }
-      return false;
-    }
-  }
-  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-  if (hideAllCode) {
-    hideAllCode.addEventListener("click", toggleCodeHandler(false));
-  }
-  const showAllCode = window.document.getElementById("quarto-show-all-code");
-  if (showAllCode) {
-    showAllCode.addEventListener("click", toggleCodeHandler(true));
-  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
+      var filterRegex = new RegExp("https:\/\/ebedthan\.github\.io\/stan-handbook\/");
     var isInternal = (href) => {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
@@ -1028,41 +1677,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Two-Way ANOVA and Interactions</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
-</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu"># One-Way ANOVA in Stan</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup-06-one-way-anova</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"../R/setup.R"</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>Treatment coding, sum-to-zero constraints, and reading ANOVA tables from Stan output.</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Learning objectives</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>By the end of this chapter you will be able to:</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 1</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 2</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="va">[ ]</span> Objective 3</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## Content</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>*Content to be written.*</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="fu">## Exercises</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Exercise 1</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Exercise 2</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Summary</span></span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>*Summary to be written.*</span>
-</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
-</div></div></div></div></div>
+</nav>
 </div> <!-- /content -->
 
 

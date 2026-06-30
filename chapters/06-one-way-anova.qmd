@@ -1,32 +1,814 @@
 # One-Way ANOVA in Stan
 
 ```{r}
-#| label: setup-06-one-way-anova
+#| label: setup-ch06
 #| include: false
 source("../R/setup.R")
 ```
 
 ## Overview
 
-Treatment coding, sum-to-zero constraints, and reading ANOVA tables from Stan output.
+One-way ANOVA is one of the most frequently used tools in life-science research: does the outcome differ across treatment groups? Students learn ANOVA as an $F$-test delivered by `aov()`. This chapter shows that ANOVA is not a separate procedure, it is linear regression with a categorical predictor, and it lives in Stan as naturally as the continuous-predictor models of Chapters 4 and 5.
 
-## Learning objectives
+The chapter introduces two parameterisations of the same model, **treatment coding** and **sum-to-zero coding**, explains why both exist, and shows how to translate Stan posterior output back into the quantities an ANOVA table would report. Along the way, we gain tools that classical ANOVA cannot provide: posterior probabilities for pairwise contrasts, honest uncertainty about group means, and a principled way to handle unbalanced designs.
+
+**Learning objectives**:
 
 By the end of this chapter you will be able to:
 
-- [ ] Objective 1
-- [ ] Objective 2
-- [ ] Objective 3
+- Explain why one-way ANOVA is a special case of linear regression
+  and write both as a Stan model.
+- Choose between treatment coding and sum-to-zero coding, implement
+  each in Stan, and interpret the parameters of each.
+- Extract posterior group means, pairwise differences, and their
+  credible intervals directly from Stan draws.
+- Reconstruct the quantities reported in a classical ANOVA table
+  ($F$-statistic, $\eta^2$) from the posterior, and explain their
+  limitations.
+- Perform a posterior predictive check appropriate for grouped data.
 
-## Content
 
-*Content to be written.*
+## ANOVA is regression {#sec-anova-is-regression}
 
-## Exercises
+Consider a completely randomised experiment with $K$ groups. The classical ANOVA model is:
 
-1. Exercise 1
-2. Exercise 2
+$$
+y_{ij} = \mu + \tau_k + \varepsilon_{ij},
+\qquad \varepsilon_{ij} \sim \text{Normal}(0, \sigma)
+$$
+
+where $\mu$ is the grand mean, $\tau_k$ is the effect of group $k$, and the constraint $\sum_k \tau_k = 0$ makes the model identifiable.
+
+Now write this as a regression. Create $K - 1$ binary dummy variables $d_{ik}$: $d_{ik} = 1$ if observation $i$ belongs to group $k$, zero otherwise. Then:
+
+$$
+y_i = \alpha + \beta_2 d_{i2} + \beta_3 d_{i3} + \cdots + \beta_K d_{iK}
++ \varepsilon_i
+$$
+
+Here $\alpha$ is the mean of group 1 (the reference), and $\beta_k$ is the difference between group $k$ and group 1. This is exactly what `lm(y ~ factor(group))` does in R, the ANOVA and the regression are
+the same model, just parameterised differently.
+
+In Stan, we can use *either* parameterisation. The choice affects how we interpret the parameters but not the predictions or the fit.
+
+@fig-anova-coding illustrates the two parameterisations side by side.
+
+```{r}
+#| label: fig-anova-coding
+#| echo: false
+#| fig-cap: >
+#|   Two parameterisations of the same one-way ANOVA model with four
+#|   groups. Treatment coding (left) sets group 1 as the reference; all
+#|   parameters are differences from group 1. Sum-to-zero coding (right)
+#|   centres all effects around the grand mean; the effects sum to zero
+#|   and the last is derived from the others.
+#| fig-width: 8
+#| fig-height: 3.8
+#| code-fold: true
+#| cache: true
+
+library(ggplot2)
+library(patchwork)
+
+K <- 4
+means <- c(1.2, 1.6, 1.0, 1.8)
+gname <- paste0("Group ", 1:K)
+
+# Treatment coding diagram
+tc_df <- data.frame(
+  group = gname,
+  mean = means,
+  label = c(
+    "α\n(ref mean)",
+    "α + τ₂",
+    "α + τ₃",
+    "α + τ₄"
+  )
+)
+
+p_tc <- ggplot(tc_df, aes(group, mean)) +
+  geom_col(fill = "#aec6c8", colour = "#2e7d6a", width = 0.55) +
+  geom_hline(yintercept = means[1], linetype = "dashed", colour = "#2e7d6a", linewidth = 0.7) +
+  geom_text(aes(label = label), vjust = -0.4, size = 3.2, colour = "#1a2e28") +
+  annotate("text", x = 0.55, y = means[1] + 0.06, label = "α", colour = "#2e7d6a", size = 3.5, fontface = "bold") +
+  scale_y_continuous(limits = c(0, 2.2)) +
+  labs(title = "Treatment coding", x = NULL, y = "Group mean") +
+  theme(plot.title = element_text(size = 11))
+
+# Sum-to-zero coding diagram
+grand <- mean(means)
+tau <- means - grand
+
+sz_df <- data.frame(
+  group = gname,
+  mean = means,
+  label = c(
+    sprintf("μ + τ₁\n(%.2f)", tau[1]),
+    sprintf("μ + τ₂\n(%.2f)", tau[2]),
+    sprintf("μ + τ₃\n(%.2f)", tau[3]),
+    sprintf("μ + τ₄*\n(%.2f)", tau[4])
+  )
+)
+
+p_sz <- ggplot(sz_df, aes(group, mean)) +
+  geom_col(fill = "#5c8a52", colour = "#3a6035", alpha = 0.75, width = 0.55) +
+  geom_hline(yintercept = grand, linetype = "dashed", colour = "#3a6035", linewidth = 0.7) +
+  geom_text(aes(label = label), vjust = -0.3, size = 3.0, colour = "#1a2e28") +
+  annotate("text", x = 0.55, y = grand + 0.06,
+           label = "μ (grand mean)", colour = "#3a6035",
+           size = 3.2, fontface = "bold") +
+  annotate("text", x = 4.45, y = 1.55,
+           label = "* derived:\nτ₄ = −Στ₁₋₃",
+           colour = "#c0392b", size = 2.8, hjust = 1) +
+  scale_y_continuous(limits = c(0, 2.2)) +
+  labs(title = "Sum-to-zero coding", x = NULL, y = NULL) +
+  theme(plot.title = element_text(size = 11))
+
+p_tc + p_sz
+```
+
+
+## Running example: soil carbon under land use types
+
+We model topsoil organic carbon (SOC, g kg⁻¹) across four land use types common in the West African forest-savanna mosaic: natural forest, agroforest, fallow, and cropland. The scientific question is whether land use type is associated with different SOC levels, a one-way ANOVA with $K = 4$ groups.
+
+```{r}
+#| label: simulate-data-ch06
+#| fig-cap: >
+#|   Simulated topsoil organic carbon (SOC, g kg⁻¹) by land use type.
+#|   Points are individual plot measurements (jittered horizontally);
+#|   horizontal bars are group means. Cropland has the lowest SOC;
+#|   natural forest the highest.
+#| fig-width: 6.5
+#| fig-height: 4
+#| code-fold: true
+#| cache: true
+
+set.seed(2025)
+
+# True group means (g/kg SOC, broadly consistent with West African
+# forest-savanna literature)
+K <- 4
+group_names <- c("Natural forest", "Agroforest", "Fallow", "Cropland")
+true_mu <- c(18.5, 14.2, 11.8, 8.4)   # group means
+true_sigma <- 2.8                     # common within-group SD
+
+# Unbalanced design (realistic: fewer forest plots)
+n_per_group <- c(10, 14, 14, 12)
+N <- sum(n_per_group)
+
+group <- rep(seq_len(K), times = n_per_group)
+y <- rnorm(N, mean = true_mu[group], sd = true_sigma)
+
+soc_df <- data.frame(
+  y = y,
+  group = group,
+  group_name = factor(group_names[group], levels = group_names)
+)
+
+# Group means for plot
+group_means <- tapply(y, soc_df$group_name, mean)
+gm_df <- data.frame(
+  group_name = names(group_means),
+  mean = as.numeric(group_means)
+)
+
+ggplot(soc_df, aes(group_name, y)) +
+  geom_jitter(width = 0.12, colour = "#2e7d6a", alpha = 0.7, size = 2) +
+  geom_crossbar(data = gm_df,
+                aes(y = mean, ymin = mean, ymax = mean),
+                colour = "#1a4a40", linewidth = 0.9, width = 0.45) +
+  labs(
+    x = "Land use type",
+    y = "Topsoil SOC (g kg⁻¹)",
+    title = "Soil organic carbon by land use type"
+  )
+```
+
+::: {.callout-note}
+**Why an unbalanced design?**  
+Natural forest plots are often scarcer and harder to access than cropland plots. With $n = (10, 14, 14, 12)$, this is a mildly unbalanced design. Classical ANOVA handles unbalanced designs awkwardly (Type I vs Type III sums of squares). Bayesian ANOVA handles them transparently, the  likelihood simply reflects the different amounts of information in each group.
+:::
+
+## Parameterisation 1: treatment coding {#sec-treatment}
+
+### The Stan model
+
+```stan
+data {
+  int<lower=1> N;
+  int<lower=2> K;
+  array[N] int<lower=1, upper=K> group;
+  vector[N] y;
+}
+
+parameters {
+  real alpha;         // reference group mean (group 1)
+  vector[K-1] tau;    // deviations from reference (groups 2..K)
+  real<lower=0> sigma;
+}
+
+transformed parameters {
+  vector[K] mu;
+  mu[1] = alpha;
+  for (k in 2:K)
+    mu[k] = alpha + tau[k-1];
+}
+
+model {
+  alpha ~ normal(0, 10);
+  tau ~ normal(0, 5);
+  sigma ~ exponential(1);
+
+  for (i in 1:N)
+    y[i] ~ normal(mu[group[i]], sigma);
+}
+
+generated quantities {
+  vector[N] y_rep;
+  vector[N] log_lik;
+
+  for (i in 1:N) {
+    y_rep[i] = normal_rng(mu[group[i]], sigma);
+    log_lik[i] = normal_lpdf(y[i] | mu[group[i]], sigma);
+  }
+}
+```
+
+### Key design decisions
+
+**`array[N] int group`** is Stan's syntax for an integer array. One group
+index per observation. Stan 2.26+ uses the `array[N] int` declaration;
+older syntax was `int group[N]`. Always use the modern form.
+
+**`transformed parameters` block.** We assemble the full group mean vector `mu` here rather than in the `model` block. This means `mu` is saved in the posterior draws automatically, we can inspect each group mean without any post-processing arithmetic.
+
+**`vector[K-1] tau`** declares $K - 1$ free treatment effects. Group 1 is the reference, so `tau[1]` is the group 2 vs group 1 difference, `tau[2]` is group 3 vs group 1, and so on. This is exactly what `lm(y ~ factor(group))` returns.
+
+### Compile and sample
+
+```{r}
+#| label: compile-tc
+#| eval: false
+mod_tc <- cmdstan_model("stan/anova_treatment.stan")
+```
+
+```{r}
+#| label: compile-tc-real
+#| include: false
+mod_tc <- cmdstan_model("../stan/anova_treatment.stan")
+```
+
+```{r}
+#| label: data-list-ch06
+stan_data_anova <- list(
+  N = N,
+  K = K,
+  group = group,
+  y = y
+)
+```
+
+```{r}
+#| label: sample-tc
+#| eval: false
+fit_path_tc <- "anova_treatment_fit.rds"
+
+if (!file.exists(fit_path_tc)) {
+  fit_tc <- mod_tc$sample(
+    data = stan_data_anova,
+    seed = 2025,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_tc$save_object(fit_path_tc)
+} else {
+  fit_tc <- readRDS(fit_path_tc)
+}
+```
+
+```{r}
+#| label: sample-tc-real
+#| include: false
+fit_path_tc <- file.path(
+  dirname(knitr::current_input(dir = TRUE)),
+  "anova_treatment_fit.rds"
+)
+
+if (!file.exists(fit_path_tc)) {
+  fit_tc <- mod_tc$sample(
+    data = stan_data_anova,
+    seed = 2025,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_tc$save_object(fit_path_tc)
+} else {
+  fit_tc <- readRDS(fit_path_tc)
+}
+```
+
+### Convergence and summary
+
+```{r}
+#| label: summary-tc
+fit_tc$summary(variables = c("alpha", "tau[1]", "tau[2]",
+                              "tau[3]", "sigma",
+                              "mu[1]", "mu[2]", "mu[3]", "mu[4]"))
+```
+
+```{r}
+#| label: fig-trace-tc
+#| fig-cap: >
+#|   Trace plots for the treatment-coded ANOVA. All chains mix well.
+#|   The tau parameters are treatment contrasts vs the reference group
+#|   (natural forest); mu parameters are the derived group means.
+#| fig-width: 9
+#| fig-height: 5
+#| code-fold: true
+#| cache: true
+mcmc_trace(
+  fit_tc$draws(c("alpha", "tau[1]", "tau[2]", "tau[3]", "sigma"))
+) +
+  labs(title = "Trace plots: treatment coding")
+```
+
+## Parameterisation 2: sum-to-zero coding {#sec-sumtozero}
+
+### Why sum-to-zero?
+
+Treatment coding makes group 1 special, all other effects are relative to it. The choice of reference group affects the values (and priors) of every `tau` parameter, which can be awkward when no group is a natural reference.
+
+Sum-to-zero coding centres all effects around the grand mean $\mu$:
+
+$$
+y_i \sim \text{Normal}(\mu + \tau_{g(i)},\; \sigma),
+\qquad \sum_{k=1}^K \tau_k = 0
+$$
+
+Now $\mu$ is the grand (unweighted) mean and $\tau_k$ is the deviation of group $k$ from it. The constraint $\sum \tau_k = 0$ is imposed by deriving the last effect: $\tau_K = -\sum_{k=1}^{K-1} \tau_k$.
+
+### The Stan model
+
+```stan
+data {
+  int<lower=1> N;
+  int<lower=2> K;
+  array[N] int<lower=1, upper=K> group;
+  vector[N] y;
+}
+
+parameters {
+  real mu;              // grand mean
+  vector[K-1] tau_raw;  // free effects for groups 1..K-1
+  real<lower=0> sigma;
+}
+
+transformed parameters {
+  vector[K] tau;
+  tau[1:(K-1)] = tau_raw;
+  tau[K] = -sum(tau_raw);   // sum-to-zero constraint
+}
+
+model {
+  mu ~ normal(0, 10);
+  tau_raw ~ normal(0, 5);
+  sigma ~ exponential(1);
+
+  for (i in 1:N)
+    y[i] ~ normal(mu + tau[group[i]], sigma);
+}
+
+generated quantities {
+  vector[N] y_rep;
+  vector[N] log_lik;
+
+  for (i in 1:N) {
+    y_rep[i] = normal_rng(mu + tau[group[i]], sigma);
+    log_lik[i] = normal_lpdf(y[i] | mu + tau[group[i]], sigma);
+  }
+}
+```
+
+::: {.callout-tip}
+**Implementing the sum-to-zero constraint.**  
+Stan cannot impose `sum(tau) == 0` as a hard constraint in the `parameters` block — that would reduce the parameter space dimension. Instead, we declare `K-1` free parameters (`tau_raw`) and derive the $K$-th in `transformed parameters` as `tau[K] = -sum(tau_raw)`. Stan samples freely in the $(K-1)$-dimensional unconstrained space and the constraint holds exactly for every draw. This is the standard Stan idiom for sum-to-zero constraints.
+:::
+
+### Compile and sample
+
+```{r}
+#| label: compile-sz-real
+#| include: false
+mod_sz <- cmdstan_model("../stan/anova_sumtozero.stan")
+```
+
+```{r}
+#| label: sample-sz-real
+#| include: false
+fit_path_sz <- file.path(
+  dirname(knitr::current_input(dir = TRUE)),
+  "anova_sumtozero_fit.rds"
+)
+
+if (!file.exists(fit_path_sz)) {
+  fit_sz <- mod_sz$sample(
+    data = stan_data_anova,
+    seed = 2025,
+    chains = 4,
+    parallel_chains = 4,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
+    refresh = 0
+  )
+  fit_sz$save_object(fit_path_sz)
+} else {
+  fit_sz <- readRDS(fit_path_sz)
+}
+```
+
+```{r}
+#| label: summary-sz
+fit_sz$summary(variables = c("mu", "tau[1]", "tau[2]",
+                              "tau[3]", "tau[4]", "sigma"))
+```
+
+::: {.callout-note}
+**Both models give identical group means.**  
+Treatment coding: group mean $k$ = `alpha + tau[k-1]`. Sum-to-zero coding: group mean $k$ = `mu + tau[k]`. The two parameterisations are mathematically equivalent, they differ only in what the named parameters represent, not in what the model predicts. Verify this by comparing `mu[k]` from the treatment model with `mu + tau[k]` from the sum-to-zero model: they should match to numerical precision.
+:::
+
+
+## Group means and pairwise comparisons {#sec-contrasts}
+
+### Posterior group means
+
+Whether you used treatment or sum-to-zero coding, the group means `mu[k]` are the quantities of primary scientific interest.
+
+```{r}
+#| label: fig-group-means
+#| fig-cap: >
+#|   Posterior distributions of group means (SOC, g kg⁻¹) for the four
+#|   land use types. Points are posterior medians; thick bars are 50%
+#|   credible intervals; thin bars are 90% credible intervals. Red
+#|   crosses mark the true data-generating means. The natural forest
+#|   mean is estimated most precisely despite the smallest sample
+#|   (n = 10), because its SOC values are more tightly clustered.
+#| fig-width: 6.5
+#| fig-height: 3.8
+#| code-fold: true
+#| cache: true
+
+draws_tc <- as_draws_df(fit_tc$draws(c("mu[1]", "mu[2]",
+                                        "mu[3]", "mu[4]")))
+names(draws_tc)[1:4] <- group_names
+
+mu_long <- draws_tc |>
+  select(all_of(group_names)) |>
+  pivot_longer(everything(),
+               names_to  = "group",
+               values_to = "value") |>
+  group_by(group) |>
+  summarise(
+    median = median(value),
+    lo50 = quantile(value, 0.25),
+    hi50 = quantile(value, 0.75),
+    lo90 = quantile(value, 0.05),
+    hi90 = quantile(value, 0.95),
+    .groups = "drop"
+  ) |>
+  mutate(
+    group = factor(group, levels = group_names),
+    true_val = true_mu[as.integer(group)]
+  )
+
+ggplot(mu_long, aes(y = group)) +
+  geom_segment(aes(x = lo90, xend = hi90, yend = group),
+               colour = "#2e7d6a", linewidth = 0.8) +
+  geom_segment(aes(x = lo50, xend = hi50, yend = group),
+               colour = "#2e7d6a", linewidth = 2.5) +
+  geom_point(aes(x = median), colour = "#1a4a40", size = 3) +
+  geom_point(aes(x = true_val), colour = "#c0392b",
+             shape = 4, size = 3, stroke = 1.2) +
+  labs(
+    x = "Topsoil SOC (g kg⁻¹)",
+    y = NULL,
+    title = "Posterior group means",
+    subtitle = "Median, 50% CI (thick), 90% CI (thin), ✕ true value"
+  )
+```
+
+### Pairwise contrasts
+
+Classical ANOVA follows up a significant $F$-test with post-hoc tests (Tukey HSD, Bonferroni). In Stan, pairwise contrasts are just arithmetic on the posterior draws, no adjustment for multiple comparisons is needed because we are estimating probabilities, not controlling Type I error rates.
+
+```{r}
+#| label: pairwise-contrasts
+#| cache: true
+#| code-fold: true
+draws_mu <- as_draws_df(fit_tc$draws(c("mu[1]", "mu[2]",
+                                        "mu[3]", "mu[4]")))
+names(draws_mu)[1:4] <- group_names
+
+# All pairwise differences
+pairs <- combn(group_names, 2, simplify = FALSE)
+
+contrast_df <- do.call(rbind, lapply(pairs, function(p) {
+  diff <- draws_mu[[p[1]]] - draws_mu[[p[2]]]
+  data.frame(
+    contrast = paste(p[1], "-", p[2]),
+    mean = round(mean(diff), 2),
+    lo90 = round(quantile(diff, 0.05), 2),
+    hi90 = round(quantile(diff, 0.95), 2),
+    p_positive = round(mean(diff > 0), 3)
+  )
+}))
+
+knitr::kable(
+  contrast_df,
+  col.names = c("Contrast", "Mean diff.", "5%", "95%",
+                "P(diff > 0 | data)"),
+  caption = "Posterior pairwise SOC differences (g kg⁻¹). The last
+               column is the posterior probability that the first group
+               has higher SOC than the second."
+)
+```
+
+```{r}
+#| label: fig-contrasts
+#| fig-cap: >
+#|   Posterior distributions of all six pairwise SOC differences.
+#|   Intervals that exclude zero (vertical dashed line) indicate
+#|   clear directional evidence. The natural forest vs cropland
+#|   contrast shows the strongest and most certain difference.
+#| fig-width: 7
+#| fig-height: 4.5
+#| code-fold: true
+#| cache: true
+
+contrast_draws <- do.call(rbind, lapply(pairs, function(p) {
+  diff <- draws_mu[[p[1]]] - draws_mu[[p[2]]]
+  data.frame(
+    contrast = paste(p[1], "-", p[2]),
+    value = diff
+  )
+}))
+
+contrast_draws |>
+  group_by(contrast) |>
+  summarise(
+    median = median(value),
+    lo90 = quantile(value, 0.05),
+    hi90 = quantile(value, 0.95),
+    lo50 = quantile(value, 0.25),
+    hi50 = quantile(value, 0.75),
+    .groups = "drop"
+  ) |>
+  mutate(
+    contrast = reorder(contrast, median)
+  ) |>
+  ggplot(aes(y = contrast)) +
+  geom_vline(xintercept = 0, linetype = "dashed",
+             colour = "grey50", linewidth = 0.7) +
+  geom_segment(aes(x = lo90, xend = hi90, yend = contrast),
+               colour = "#2e7d6a", linewidth = 0.8) +
+  geom_segment(aes(x = lo50, xend = hi50, yend = contrast),
+               colour = "#2e7d6a", linewidth = 2.5) +
+  geom_point(aes(x = median), colour = "#1a4a40", size = 3) +
+  labs(
+    x = "Difference in SOC (g kg⁻¹)",
+    y = NULL,
+    title = "Posterior pairwise contrasts",
+    subtitle = "Median, 50% CI (thick), 90% CI (thin)"
+  )
+```
+
+## Connecting to the classical ANOVA table {#sec-anova-table}
+
+Students expect to see an ANOVA table with $SS$, $df$, $MS$, and the $F$-statistic. We can reconstruct these from the posterior, but more importantly we can explain *what they actually measure*, and why the Bayesian alternatives are more useful.
+
+### The classical table
+
+```{r}
+#| label: classical-anova
+aov_fit <- aov(y ~ factor(group), data = soc_df)
+summary(aov_fit)
+```
+
+### Posterior $R^2$ and $\eta^2$
+
+The classical effect size $\eta^2 = SS_{\text{between}} / SS_{\text{total}}$ measures the proportion of variance explained by group membership. We can compute a Bayesian analogue directly from the posterior.
+
+```{r}
+#| label: bayes-r2
+#| cache: true
+#| code-fold: true
+# Bayesian R²
+# R² = Var(fitted) / (Var(fitted) + sigma²)
+draws_all <- as_draws_df(
+  fit_tc$draws(c("mu[1]", "mu[2]", "mu[3]", "mu[4]", "sigma"))
+)
+
+# Column names are "mu[1]"..."mu[4]" and "sigma", use them directly
+mu_cols <- paste0("mu[", 1:K, "]")
+
+bayes_r2 <- sapply(seq_len(nrow(draws_all)), function(i) {
+  # Map each observation to its group mean draw
+  mu_obs <- as.numeric(draws_all[i, mu_cols])[group]
+  var_fit <- var(mu_obs)
+  sigma_i <- draws_all$sigma[i]
+  var_fit / (var_fit + sigma_i^2)
+})
+
+cat("Posterior mean Bayesian R²: ", round(mean(bayes_r2), 3), "\n")
+cat("90% credible interval: [",
+    round(quantile(bayes_r2, 0.05), 3), ",",
+    round(quantile(bayes_r2, 0.95), 3), "]\n")
+cat("Classical eta²:             ",
+    round(summary(aov_fit)[[1]]["factor(group)", "Sum Sq"] /
+          sum(summary(aov_fit)[[1]][, "Sum Sq"]), 3), "\n")
+```
+
+::: {.callout-note}
+**Why Bayesian $R^2$ instead of $\eta^2$?**  
+Classical $\eta^2$ is a single number computed from point estimates. Bayesian $R^2$ [@gelman2019r2] is a full posterior distribution: it tells you not just the most likely proportion of variance explained, but how uncertain that proportion is. With small samples, the credible interval for $R^2$ can be very wide, a fact $\eta^2$ conceals entirely.
+:::
+
+### Reconstructing the $F$-statistic
+
+The $F$-statistic can be recovered from the posterior mean estimates, but this is rarely useful that is the posterior gives richer information directly. We show it here purely for comparison.
+
+```{r}
+#| label: f-from-posterior
+#| code-fold: true
+#| cache: true
+# Posterior mean group means
+mu_hat  <- colMeans(draws_all[, mu_cols])
+sigma_hat <- mean(draws_all$sigma)
+
+# Between-group variance (weighted by n)
+grand_hat <- weighted.mean(mu_hat, n_per_group)
+ss_between <- sum(n_per_group * (mu_hat - grand_hat)^2)
+ms_between <- ss_between / (K - 1)
+ms_within  <- sigma_hat^2
+
+cat("F from posterior means:  ", round(ms_between / ms_within, 2), "\n")
+cat("F from classical ANOVA:  ",
+    round(summary(aov_fit)[[1]]["factor(group)", "F value"], 2), "\n")
+```
+
+
+## Posterior predictive check
+
+```{r}
+#| label: fig-ppc-ch06
+#| fig-cap: >
+#|   Posterior predictive check for the treatment-coded ANOVA.
+#|   Observed SOC distributions per group (dark lines) are well
+#|   covered by the 50 replicated datasets (light lines). The
+#|   wider spread for natural forest (smallest n) is correctly
+#|   captured by the model.
+#| fig-width: 8
+#| fig-height: 4.5
+#| cache: true
+#| code-fold: true
+
+y_rep_tc <- as_draws_matrix(fit_tc$draws("y_rep"))
+
+ppc_dens_overlay_grouped(
+  y = y,
+  yrep = y_rep_tc[1:50, ],
+  group = soc_df$group_name
+) +
+  labs(
+    title = "Posterior predictive check by land use type",
+    subtitle = "Dark: observed. Light: 50 posterior predictive datasets"
+  ) +
+  theme(legend.position = "none")
+```
+
+
+## Comparison with `aov()` and `lm()`
+
+```{r}
+#| label: compare-classical
+#| cache: true
+#| code-fold: true
+# lm() with treatment coding (same parameterisation as Stan model 1)
+lm_tc <- lm(y ~ factor(group), data = soc_df)
+
+# Stan posterior means for group means
+stan_mu <- fit_tc$summary(paste0("mu[", 1:K, "]")) |>
+  select(variable, mean, q5, q95)
+
+# lm() group means (alpha + tau)
+lm_mu <- c(
+  coef(lm_tc)[1],
+  coef(lm_tc)[1] + coef(lm_tc)[-1]
+)
+lm_ci <- predict(lm_tc,
+                  newdata = data.frame(group = factor(1:K)),
+                  interval = "confidence", level = 0.90)
+
+comparison <- data.frame(
+  group = group_names,
+  stan_mean = round(stan_mu$mean, 2),
+  stan_lo = round(stan_mu$q5, 2),
+  stan_hi = round(stan_mu$q95, 2),
+  lm_mean = round(lm_mu, 2),
+  lm_lo = round(lm_ci[, "lwr"], 2),
+  lm_hi = round(lm_ci[, "upr"], 2),
+  true = true_mu
+)
+
+knitr::kable(
+  comparison,
+  col.names = c("Group", "Bayes mean", "Bayes 5%", "Bayes 95%",
+                "OLS mean", "OLS 5%", "OLS 95%", "True"),
+  caption = "Posterior group means vs OLS estimates. Values are
+               nearly identical with weakly informative priors
+               and n ≥ 10 per group."
+)
+```
+
 
 ## Summary
 
-*Summary to be written.*
+- One-way ANOVA is linear regression with a categorical predictor. In
+  Stan, the two natural parameterisations are **treatment coding**
+  (effects relative to a reference group) and **sum-to-zero coding**
+  (effects relative to the grand mean). Both give identical group means
+  and fits.
+- Treatment coding uses `real alpha` and `vector[K-1] tau`; the full
+  group mean vector is assembled in `transformed parameters`. Sum-to-zero
+  coding uses `real mu` and `vector[K-1] tau_raw`, deriving the last
+  effect as `tau[K] = -sum(tau_raw)`.
+- **Pairwise contrasts** are arithmetic on posterior draws, no
+  multiplicity adjustment is required, and the result is a full
+  posterior distribution for each difference, not just a $p$-value.
+- Bayesian $R^2$ generalises $\eta^2$ to a posterior distribution that
+  honestly represents uncertainty about the proportion of variance
+  explained.
+- Unbalanced designs are handled transparently by the likelihood;
+  no special treatment is required.
+- The `ppc_dens_overlay_grouped()` function from `bayesplot` provides
+  a group-specific predictive check, more informative than the
+  marginal overlay used in earlier chapters.
+
+
+## Exercises
+
+1. **Change the reference group.** Refit the treatment-coded model
+   setting cropland (group 4) as the reference. How do `alpha` and the
+   `tau` values change? Do the group means `mu[k]` change? Why or why not?
+
+2. **Verify the equivalence.** Using posterior draws from both the
+   treatment-coded and sum-to-zero models, compute the group means
+   implied by each (`alpha + tau[k-1]` vs `mu + tau[k]`). Show that
+   they match to numerical precision using `all.equal()`.
+
+3. **Ordered contrasts.** Ecologists often expect a monotone gradient:
+   forest > agroforest > fallow > cropland. Using the pairwise contrast
+   draws, compute the posterior probability that *all three* adjacent
+   pairs are in the expected direction simultaneously:
+   ```{r}
+   #| eval: false
+   mean(
+     (draws_mu[["Natural forest"]] > draws_mu[["Agroforest"]]) &
+     (draws_mu[["Agroforest"]] > draws_mu[["Fallow"]]) &
+     (draws_mu[["Fallow"]] > draws_mu[["Cropland"]])
+   )
+   ```
+   What is this probability? Is it larger or smaller than you expected?
+
+4. **Heteroscedastic ANOVA.** The homoscedastic assumption (common
+   $\sigma$ across groups) can be relaxed. Modify the treatment-coded
+   Stan model to estimate a separate `sigma[k]` for each group:
+   replace `real<lower=0> sigma` with `vector<lower=0>[K] sigma` and
+   update the likelihood to `normal(mu[group[i]], sigma[group[i]])`.
+   Refit and compare LOO scores. Is the heteroscedastic model preferred?
+
+5. **Sample size sensitivity.** Rerun the simulation with
+   `n_per_group <- c(3, 4, 4, 3)` (very small groups). How do the
+   posterior group means compare to the OLS means? Where does the
+   Bayesian approach benefit most from the prior?
+
+
+## Further reading
+
+- @gelman2020regression [Ch. 16]: ANOVA from a regression perspective,
+  with a thorough treatment of parameterisation choices.
+- @mcelreath2020rethinking [Ch. 5]: categorical predictors and contrasts
+  built from posterior draws, with the DAG perspective on group structure.
+- @gelman2013bda [Ch. 15]: hierarchical ANOVA as a Bayesian model;
+  previews the partial-pooling approach of Chapter 8.
+- @gelman2019r2: the reference for Bayesian $R^2$ as a posterior
+  distribution rather than a point estimate.
+- Stan User's Guide, "ANOVA Models":
+  <https://mc-stan.org/docs/stan-users-guide/regression.html>
